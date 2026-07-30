@@ -1013,8 +1013,8 @@
             let headerRowIndex = -1;
             for (let i = 0; i < Math.min(20, data.length); i++) {
                 const rowStr = data[i].join(',').toLowerCase();
-                // Si la fila contiene Site y Requests, es la ganadora
-                if ((rowStr.includes('site') || rowStr.includes('domain')) && 
+                // Si la fila contiene Site, Domain o App Bundle y Requests, es la ganadora
+                if ((rowStr.includes('site') || rowStr.includes('domain') || rowStr.includes('app bundle')) && 
                     (rowStr.includes('requests'))) {
                     headerRowIndex = i;
                     break;
@@ -1022,7 +1022,7 @@
             }
 
             if (headerRowIndex === -1) {
-                errText.innerText = "El documento no parece tener un formato válido. No se encontraron las columnas necesarias ('Site', 'Requests').";
+                errText.innerText = "El documento no parece tener un formato válido. No se encontraron las columnas necesarias ('Site' o 'App Bundle', 'Requests').";
                 errLog.classList.remove('hidden');
                 showToast("Falla de lectura del reporte.", "rose");
                 document.getElementById('upload-status-text').innerText = "Presiona para buscar o arrastra el archivo aquí";
@@ -1032,7 +1032,8 @@
             const rawHeaders = data[headerRowIndex];
             const headers = rawHeaders.map(cleanHeader);
 
-            const siteCol = headers.findIndex(h => h === 'site' || h === 'sitio' || h === 'domain' || h === 'website');
+            // Búsqueda inteligente de columna identificadora (Site o App Bundle)
+            const siteCol = headers.findIndex(h => h === 'site' || h === 'sitio' || h === 'domain' || h === 'app bundle' || h === 'website');
             const requestsCol = headers.findIndex(h => h === 'gross requests' || h === 'requests' || h === 'solicitudes');
             
             // Priorización de ingresos
@@ -1043,7 +1044,7 @@
 
             if (siteCol === -1 || requestsCol === -1 || priceCol === -1) {
                 const missing = [];
-                if (siteCol === -1) missing.push("'Site'");
+                if (siteCol === -1) missing.push("'Site' / 'App Bundle'");
                 if (requestsCol === -1) missing.push("'Gross Requests'");
                 if (priceCol === -1) missing.push("'Revenue' o 'Net net price'");
 
@@ -1068,7 +1069,7 @@
                 const row = data[i];
                 if (row.length <= Math.max(siteCol, requestsCol, priceCol)) continue; // Saltar filas rotas
 
-                const siteName = row[siteCol] ? row[siteCol].toString().replace(/["']/g, '').trim() : `Sitio #${i}`;
+                const siteName = row[siteCol] ? row[siteCol].toString().replace(/["']/g, '').trim() : `Elemento #${i}`;
                 const grossRequests = parseCleanNumber(row[requestsCol]);
                 const grossPrice = parseCleanNumber(row[priceCol]);
 

@@ -1,1397 +1,763 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma de Auditoría e Ingresos RPM</title>
-    <!-- Google Fonts: Plus Jakarta Sans -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js para visualización de métricas de sitios y escenarios -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PapaParse para procesamiento rápido y seguro de CSV -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            900: '#064e3b',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        .transition-all {
-            transition: all 0.3s ease-in-out;
-        }
-        /* Ocultar barra de scroll en listas táctiles */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPM Auditor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Inria+Serif:ital,wght@1,400;1,700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['"Inria Serif"', 'serif'] },
+    colors: {
+      ink:     '#1B043F',
+      muted:   '#5B5773',
+      line:    '#D3DCF2',
+      canvas:  '#F5F7FC',
+      primary: { DEFAULT: '#FF4F00', hover: '#E04500', soft: '#FFEDE5' },
+      grape:   { DEFAULT: '#611BC5', hover: '#4E139F', soft: '#EFE7FB' },
+      info:    { DEFAULT: '#0066FF', soft: '#E5F0FF' },
+      accent:  '#F971FF',
+      ok:      { DEFAULT: '#0F8A5F', soft: '#E3F4EC' },
+      warn:    { DEFAULT: '#B86E00', soft: '#FFF3DC' },
+      danger:  { DEFAULT: '#D6283B', soft: '#FCE6E8' }
+    }
+  } }
+}
+</script>
 </head>
-<body class="h-full text-slate-100 font-sans antialiased bg-slate-950 flex flex-col justify-between">
+<body class="bg-canvas text-ink font-sans antialiased min-h-screen">
+  
+  <header class="bg-ink text-white">
+    <div class="h-1 bg-gradient-to-r from-grape to-primary"></div>
+    <div class="h-16 flex items-center justify-between max-w-7xl mx-auto px-6">
+      <div class="flex items-center gap-3">
+        <svg class="h-5 w-auto shrink-0" aria-label="Logo" width="124" height="25" viewBox="0 0 124 25" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:c2pa="http://c2pa.org/manifest"><path fill-rule="evenodd" clip-rule="evenodd" d="M54.4316 0C53.827 0 53.2579 0.236658 52.8301 0.667884L48.0652 5.4622C47.6374 5.89263 47.4014 6.46442 47.4014 7.07354C47.4014 7.68265 47.6366 8.25445 48.0652 8.68488C48.493 9.11531 49.062 9.35276 49.6666 9.35276C50.2712 9.35276 50.8403 9.1161 51.2681 8.68488L56.033 3.88977C56.4608 3.45934 56.6968 2.88675 56.6968 2.27843C56.6968 1.67011 56.4608 1.09752 56.033 0.66709C55.6052 0.236658 55.037 0 54.4316 0ZM53.22 0.447903C53.1308 0.507465 53.0456 0.574968 52.9651 0.64803C53.0456 0.574174 53.1308 0.507465 53.22 0.447903ZM51.2129 8.62929C51.1355 8.70711 51.0534 8.77859 50.9666 8.84291C51.0526 8.77859 51.1347 8.70711 51.2129 8.62929ZM89.7006 0.357818H65.6762C64.471 0.357818 63.4907 1.34416 63.4907 2.55683C63.4907 3.76951 64.471 4.75585 65.6762 4.75585H74.2708C74.9622 4.78682 75.5044 5.35623 75.5044 6.05191V22.7816C75.525 24.0991 76.6268 24.8861 77.6797 24.8861C78.0767 24.8861 78.6576 24.7765 79.1746 24.2571C79.563 23.8664 79.7832 23.347 79.795 22.8014V6.0535C79.795 5.37052 80.3783 4.7892 81.0958 4.75743H89.7006C90.9058 4.75743 91.8861 3.7703 91.8861 2.55763C91.8861 1.34495 90.9058 0.358612 89.7006 0.358612V0.357818ZM21.4418 4.75791H5.59211L5.59053 4.75871C4.89911 4.78968 4.35687 5.3583 4.35687 6.05477V10.3035L16.5411 10.3019C17.7464 10.3019 18.7267 11.2883 18.7267 12.5009C18.7267 13.7136 17.7464 14.6999 16.5411 14.6999H4.35766V18.9383C4.35766 19.6539 4.93621 20.2368 5.64815 20.2368L21.441 20.2431C22.647 20.2431 23.6273 21.2295 23.6273 22.4422C23.6273 23.6548 22.647 24.6412 21.4418 24.6412H1.45229C0.651163 24.6412 0 23.986 0 23.1799V1.82034C0 1.01506 0.651163 0.35909 1.45229 0.35909H21.4418C22.647 0.35909 23.6273 1.34543 23.6273 2.5581C23.6273 3.77078 22.647 4.75791 21.4418 4.75791ZM105.14 20.236L120.933 20.2423V20.2431C122.139 20.2431 123.119 21.2295 123.119 22.4422C123.119 23.6548 122.139 24.6412 120.934 24.6412H100.944C100.143 24.6412 99.4918 23.986 99.4918 23.1799V1.82034C99.4918 1.01506 100.143 0.35909 100.944 0.35909H120.934C122.139 0.35909 123.119 1.34543 123.119 2.5581C123.119 3.77078 122.139 4.75791 120.934 4.75791H105.084C104.392 4.78889 103.849 5.3575 103.849 6.05398V10.3027L116.034 10.3011C117.239 10.3011 118.219 11.2875 118.219 12.5001C118.219 13.7128 117.239 14.6991 116.034 14.6991H103.849V18.9376C103.849 19.6531 104.428 20.236 105.14 20.236ZM37.2799 16.3152C37.7077 15.8848 38.276 15.6474 38.8814 15.6474C39.4868 15.6474 40.055 15.8848 40.4828 16.3152C40.9098 16.7449 41.1451 17.3175 41.1451 17.9266C41.1451 18.5357 40.9098 19.1083 40.4828 19.5379L35.7179 24.3322C35.2901 24.7635 34.721 25.0001 34.1164 25.0001C33.5118 25.0001 32.9428 24.7627 32.515 24.3322C31.6318 23.4436 31.6318 21.9982 32.515 21.1096L37.2799 16.3152ZM39.9106 15.9849C39.8483 15.9515 39.7835 15.9206 39.7188 15.8936C39.7843 15.9206 39.8483 15.9515 39.9106 15.9849ZM38.0432 15.8936C38.1742 15.8388 38.3107 15.7975 38.4504 15.7697C38.3107 15.7975 38.1742 15.8396 38.0432 15.8936ZM33.1338 24.6864C33.1638 24.7015 33.1938 24.7158 33.2245 24.7301C33.1938 24.7166 33.1638 24.7015 33.1338 24.6864ZM33.601 24.8588C33.5253 24.8405 33.4511 24.8183 33.3785 24.7921C33.4511 24.8183 33.5261 24.8405 33.601 24.8588ZM34.1165 0C34.7218 0 35.2901 0.237452 35.7179 0.667884L35.7187 0.668678L40.4836 5.46299C40.9107 5.89263 41.1459 6.46521 41.1459 7.07433C41.1459 7.68345 40.9107 8.25603 40.4836 8.68567C40.0559 9.1161 39.4868 9.35355 38.8822 9.35355C38.2776 9.35355 37.7085 9.1161 37.2807 8.68567L32.5158 3.89056C32.0872 3.46013 31.852 2.88834 31.852 2.27922C31.852 1.67011 32.0872 1.09832 32.515 0.667884C32.9428 0.237452 33.5111 0 34.1165 0ZM32.571 0.724269C32.6484 0.646442 32.7305 0.574968 32.8173 0.510641C32.7313 0.574968 32.6492 0.646442 32.571 0.724269ZM33.2798 0.246188C33.3777 0.204892 33.4795 0.171537 33.5829 0.14533C33.4795 0.171537 33.3785 0.204892 33.2798 0.246188ZM34.1172 0.0794155C33.9349 0.0794155 33.7558 0.101652 33.5829 0.14533C33.7558 0.101652 33.9341 0.0794155 34.1172 0.0794155ZM37.3368 8.62849C37.4915 8.78494 37.6651 8.91439 37.853 9.01524C37.6659 8.91359 37.4915 8.78414 37.3368 8.62849ZM37.853 9.01524C37.9153 9.0486 37.9792 9.07957 38.0447 9.10657C37.98 9.07957 37.9153 9.0486 37.853 9.01524ZM38.1442 9.14548C38.2113 9.16931 38.2792 9.18996 38.3478 9.20743C38.2792 9.18996 38.2105 9.16931 38.1442 9.14548ZM40.4276 8.62928C40.8537 8.20052 41.0669 7.63739 41.0669 7.07434C41.067 7.63759 40.8539 8.20077 40.4276 8.62928ZM51.2671 16.3132C50.8393 15.8828 50.2702 15.6453 49.6656 15.6453C49.061 15.6453 48.492 15.882 48.0642 16.3124C47.181 17.2011 47.181 18.6464 48.0642 19.5351L52.8291 24.3294C53.2569 24.7598 53.8252 24.9973 54.4306 24.9973C55.036 24.9973 55.6042 24.7606 56.032 24.3294C56.4598 23.899 56.6958 23.3264 56.6958 22.7181C56.6958 22.1098 56.4598 21.5372 56.032 21.1067L51.2671 16.3124V16.3132ZM50.5023 15.8915C50.5678 15.9185 50.6317 15.9495 50.6941 15.9828C50.6317 15.9495 50.567 15.9185 50.5023 15.8915ZM49.1313 15.7915C49.2307 15.7668 49.3318 15.7486 49.4352 15.7382C49.3326 15.7494 49.2307 15.7668 49.1313 15.7915ZM48.3657 16.156C48.2789 16.2203 48.1968 16.2918 48.1194 16.3696C48.1976 16.2918 48.2797 16.2203 48.3657 16.156ZM47.84 16.7143C47.9197 16.5928 48.0129 16.4768 48.1194 16.3696C48.0129 16.4768 47.9197 16.592 47.84 16.7143ZM48.1194 19.4803C48.0129 19.3731 47.9197 19.2579 47.84 19.1356C47.9197 19.2571 48.0129 19.3731 48.1194 19.4803ZM53.4637 24.6939C53.4882 24.7058 53.5134 24.7178 53.5387 24.7297C53.5134 24.7185 53.4882 24.7066 53.4637 24.6939ZM42.2013 12.3454C42.2013 11.0755 43.2282 10.0423 44.4903 10.0423C45.7523 10.0423 46.7792 11.0755 46.7792 12.3454C46.7792 13.6152 45.7523 14.6484 44.4903 14.6484C43.2282 14.6484 42.2013 13.6152 42.2013 12.3454ZM42.3055 12.0078C42.3166 11.934 42.3316 11.8617 42.3497 11.791C42.3316 11.8617 42.3166 11.9348 42.3055 12.0078ZM46.0538 13.9186C46.1036 13.8685 46.1517 13.8153 46.1967 13.7605C46.1517 13.8153 46.1044 13.8685 46.0538 13.9186Z" fill="#FFFFFF"></path></svg>
+        <span class="h-5 w-px bg-white/20"></span>
+        <span class="text-lg font-bold">RPM <span class="font-serif italic font-normal">Auditor</span></span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-white/10 hidden sm:inline-block">v4.0</span>
+      </div>
+      <nav class="flex gap-1 p-1 bg-white/10 rounded-lg">
+        <button id="tab-btn-calculadora" class="px-4 py-1.5 text-sm font-medium rounded-md bg-white text-ink">Calculator</button>
+        <button id="tab-btn-analizador" class="px-4 py-1.5 text-sm font-medium rounded-md text-white/70 hover:text-white">CSV Analyzer</button>
+      </nav>
+    </div>
+  </header>
 
-    <!-- Notificaciones flotantes (Toast global) -->
-    <div id="toast" class="fixed top-4 right-4 z-50 transform translate-y-[-150%] opacity-0 transition-all duration-300 ease-out bg-slate-900 text-slate-100 border border-brand-500/30 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
-        <span id="toast-icon"></span>
-        <span id="toast-message" class="text-sm font-medium"></span>
+  <section class="bg-white border-b border-line">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col lg:flex-row gap-6 lg:items-center lg:justify-between">
+      <div class="flex flex-col gap-1 max-w-xl">
+        <span class="text-xs font-medium uppercase tracking-wide text-muted">About this tool</span>
+        <p class="text-sm text-ink">Simulate revenue manually or analyze CSV reports in bulk to audit your sites' performance.</p>
+      </div>
+      <ol class="flex flex-col sm:flex-row gap-4 sm:gap-6">
+        <li class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-grape-soft text-grape text-xs font-bold flex items-center justify-center shrink-0">1</span><span class="text-sm">Select a tool</span></li>
+        <li class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-grape-soft text-grape text-xs font-bold flex items-center justify-center shrink-0">2</span><span class="text-sm">Enter metrics or upload CSV</span></li>
+        <li class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-grape-soft text-grape text-xs font-bold flex items-center justify-center shrink-0">3</span><span class="text-sm">Review the diagnosis</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <main class="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
+    
+    <!-- VIEW: CALCULATOR -->
+    <div id="view-calculadora" class="flex flex-col gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Card: Inputs -->
+        <section class="bg-white border border-line rounded-xl p-6 flex flex-col gap-4">
+          <div class="flex flex-col gap-1">
+            <h2 class="text-base font-bold text-ink">1. Manual Simulator</h2>
+            <p class="text-xs text-muted">Enter your network metrics for a quick diagnosis.</p>
+          </div>
+          
+          <div class="flex flex-col gap-4">
+            <!-- Currency -->
+            <div>
+              <label class="text-xs font-medium uppercase tracking-wide text-muted mb-1.5 block">Display currency</label>
+              <select id="currency-select" class="w-full px-3 py-2 rounded-lg bg-white border border-line text-sm text-ink focus:outline-none focus:border-grape focus:ring-2 focus:ring-grape/20">
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="MXN">MXN ($)</option>
+                <option value="ARS">ARS ($)</option>
+                <option value="COP">COP ($)</option>
+              </select>
+            </div>
+
+            <!-- Requests -->
+            <div>
+              <label class="text-xs font-medium uppercase tracking-wide text-muted mb-1.5 block">Gross Requests</label>
+              <input type="text" id="calc-input-requests" value="12,000,000" placeholder="e.g. 10,000,000" class="w-full px-3 py-2 rounded-lg bg-white border border-line text-sm text-ink placeholder-muted focus:outline-none focus:border-grape focus:ring-2 focus:ring-grape/20">
+            </div>
+
+            <!-- Revenue -->
+            <div>
+              <label class="text-xs font-medium uppercase tracking-wide text-muted mb-1.5 block">Total Revenue</label>
+              <div class="relative">
+                <span class="absolute left-3 top-2 text-sm text-muted currency-symbol">$</span>
+                <input type="text" id="calc-input-revenue" value="0.90" placeholder="e.g. 250.00" class="w-full pl-7 pr-3 py-2 rounded-lg bg-white border border-line text-sm text-ink placeholder-muted focus:outline-none focus:border-grape focus:ring-2 focus:ring-grape/20">
+              </div>
+            </div>
+
+            <!-- Save Scenario -->
+            <div class="flex gap-3 pt-4 border-t border-line mt-2">
+              <input type="text" id="scenario-name" placeholder="Name (e.g. Network A)" class="w-full px-3 py-2 rounded-lg bg-white border border-line text-sm text-ink placeholder-muted focus:outline-none focus:border-grape focus:ring-2 focus:ring-grape/20">
+              <button id="btn-save-scenario" class="shrink-0 px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-medium">Save</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Card: Results -->
+        <section class="flex flex-col gap-6">
+          <div class="bg-white border border-line rounded-xl p-6 flex flex-col gap-4">
+            <div class="flex flex-col gap-1">
+              <h2 class="text-base font-bold text-ink">Health diagnosis</h2>
+              <p class="text-xs text-muted">Real-time evaluation of the entered metrics.</p>
+            </div>
+            
+            <div class="flex items-center gap-4 mt-2">
+              <div id="traffic-light-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-ok-soft text-ok">
+                <span class="h-2 w-2 rounded-full bg-current"></span>
+                <span id="traffic-light-title">Healthy</span>
+              </div>
+            </div>
+            <p id="traffic-light-desc" class="text-sm text-ink mt-2">Traffic and revenue are performing stably.</p>
+            
+            <!-- Evaluation Formulas Box -->
+            <div class="mt-4 p-4 rounded-lg bg-canvas border border-line text-xs">
+              <span class="font-bold text-ink block mb-2">Evaluation formulas:</span>
+              <ul class="flex flex-col gap-1.5 text-muted">
+                <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-danger"></span> <strong>Critical:</strong> Request RPM &lt; 0.0001 AND Requests &gt; 10M</li>
+                <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-warn"></span> <strong>At risk:</strong> Request RPM &lt; 0.0005 AND Requests &gt; 5M</li>
+                <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-ok"></span> <strong>Healthy:</strong> Metrics do not meet risk thresholds.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- KPI Grid -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white border border-line rounded-xl p-6 flex flex-col gap-3">
+              <span class="text-xs font-medium uppercase tracking-wide text-muted">Request RPM</span>
+              <span class="text-3xl font-bold text-ink tabular-nums" id="result-request-rpm">$0.00</span>
+            </div>
+            <div class="bg-white border border-line rounded-xl p-6 flex flex-col gap-3">
+              <span class="text-xs font-medium uppercase tracking-wide text-muted">Revenue / Request</span>
+              <span class="text-3xl font-bold text-ink tabular-nums" id="result-average-val">$0.00</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Saved Scenarios -->
+      <section id="scenarios-container" class="bg-white border border-line rounded-xl p-6 hidden flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-ink">Simulation History</h2>
+          <button id="btn-clear-scenarios" class="text-sm font-medium text-danger hover:opacity-80">Clear all</button>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <div class="h-64 relative w-full">
+            <canvas id="scenario-chart"></canvas>
+          </div>
+          <div class="flex flex-col gap-2 max-h-64 overflow-y-auto pr-2" id="scenarios-list">
+            <!-- JS Generated Items -->
+          </div>
+        </div>
+      </section>
     </div>
 
-    <!-- Header con Índice de Navegación Unificada -->
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-brand-500/10 rounded-xl border border-brand-500/30">
-                    <svg class="w-6 h-6 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-md sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                        Auditor AdTech <span class="text-[10px] sm:text-xs font-normal px-2 py-0.5 bg-brand-500/10 text-brand-500 rounded-full border border-brand-500/20">v3.0</span>
-                    </h1>
-                </div>
-            </div>
-
-            <!-- Índice de Navegación de Escritorio -->
-            <nav class="hidden md:flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
-                <button id="tab-btn-calculadora" onclick="switchTab('calculadora')" class="px-4 py-1.5 text-xs font-semibold rounded-lg bg-brand-500/10 text-brand-500 border border-brand-500/20 transition-all font-bold">
-                    Calculadora Simple
-                </button>
-                <button id="tab-btn-analizador" onclick="switchTab('analizador')" class="px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-all">
-                    Analizador CSV por Sitio
-                </button>
-            </nav>
-
-            <div class="flex items-center gap-3">
-                <!-- Selector de Moneda Compartido -->
-                <select id="currency-select" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs sm:text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 p-2 outline-none">
-                    <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                    <option value="MXN">MXN ($)</option>
-                    <option value="ARS">ARS ($)</option>
-                    <option value="COP">COP ($)</option>
-                </select>
-            </div>
+    <!-- VIEW: CSV ANALYZER -->
+    <div id="view-analizador" class="hidden flex-col gap-6">
+      
+      <!-- Upload Section -->
+      <section id="upload-section" class="bg-white border border-line rounded-xl p-6 flex flex-col gap-4">
+        <div class="flex flex-col gap-1">
+          <h2 class="text-base font-bold text-ink">1. Upload report</h2>
+          <p class="text-xs text-muted">Upload your .csv file. Site, Gross Requests, and Revenue columns will be extracted automatically.</p>
         </div>
-
-        <!-- Índice de Navegación Móvil -->
-        <div class="md:hidden flex border-t border-slate-800/60 bg-slate-900/80 py-2.5 justify-around">
-            <button id="tab-mob-calculadora" onclick="switchTab('calculadora')" class="text-xs font-bold text-brand-500 transition-all">Calculadora</button>
-            <button id="tab-mob-analizador" onclick="switchTab('analizador')" class="text-xs font-semibold text-slate-400 hover:text-white transition-all">Analizador CSV</button>
-        </div>
-    </header>
-
-    <!-- Main Workspace -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <!-- ================= VISTA 1: CALCULADORA SIMPLE ================= -->
-        <section id="view-calculadora" class="space-y-8 transition-all duration-300">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                
-                <!-- Entrada de datos -->
-                <div class="lg:col-span-5 flex flex-col gap-6">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-2xl"></div>
-                        
-                        <h2 class="text-xl font-semibold text-white mb-6 flex items-center justify-between">
-                            Simulador Manual
-                            <button onclick="resetInputsCalc()" class="text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1 transition-all">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 15H15"></path></svg>
-                                Reiniciar
-                            </button>
-                        </h2>
+        <label id="drop-zone" class="border-2 border-dashed border-line rounded-xl p-8 text-center bg-canvas hover:border-grape cursor-pointer flex flex-col gap-1 transition-colors">
+          <input type="file" id="csv-file-input" accept=".csv" class="hidden">
+          <span class="text-sm font-medium text-ink" id="upload-status-text">Drop your .csv file here</span>
+          <span class="text-xs text-muted">or click to browse</span>
+        </label>
+        
+        <div id="mapping-error-log" class="hidden p-3 bg-danger-soft border border-danger/30 rounded-lg text-sm text-danger mt-2">
+          <span class="font-bold block mb-1">File reading error:</span>
+          <span id="mapping-error-text" class="font-mono text-xs"></span>
+        </div>
 
-                        <div class="space-y-6">
-                            <!-- Campo: Solicitudes Brutas -->
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <label for="calc-input-requests" class="text-sm font-medium text-slate-300">Solicitudes Brutas (Gross Requests)</label>
-                                    <span class="text-xs text-slate-500">Métricas diarias</span>
-                                </div>
-                                <div class="relative rounded-xl shadow-sm">
-                                    <input type="text" id="calc-input-requests" value="12,000,000" placeholder="Ej. 10,000,000" 
-                                           class="block w-full bg-slate-950 border border-slate-800 rounded-xl pl-4 pr-12 py-3.5 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-lg font-semibold">
-                                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-500 font-mono text-sm">REQ</div>
-                                </div>
-                            </div>
+        <div class="flex gap-3 justify-end mt-2">
+          <button id="btn-load-demo" class="px-4 py-2 rounded-lg bg-white border border-line hover:border-grape text-ink text-sm font-medium">Load Demo</button>
+          <button id="btn-process-file" class="hidden px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-medium">Process file</button>
+        </div>
+      </section>
 
-                            <!-- Campo: Ingresos -->
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <label for="calc-input-revenue" class="text-sm font-medium text-slate-300">Ingresos Totales (Revenue)</label>
-                                    <span class="text-xs text-slate-500">Monto ganado</span>
-                                </div>
-                                <div class="relative rounded-xl shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <span class="text-slate-500 font-semibold currency-symbol">$</span>
-                                    </div>
-                                    <input type="text" id="calc-input-revenue" value="0.90" placeholder="Ej. 250.00" 
-                                           class="block w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-3.5 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-lg font-semibold">
-                                </div>
-                            </div>
-
-                            <!-- Toggle Avanzado: Impresiones -->
-                            <div class="border-t border-slate-800/80 pt-4">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-medium text-slate-200">Modo Avanzado</span>
-                                        <span class="text-xs text-slate-500">Calcular Fill Rate e Impresión RPM</span>
-                                    </div>
-                                    <button id="toggle-advanced" onclick="toggleAdvancedMode()" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-slate-800">
-                                        <span class="translate-x-0 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-slate-400 shadow ring-0 transition duration-200 ease-in-out" id="toggle-circle"></span>
-                                    </button>
-                                </div>
-
-                                <div id="advanced-container" class="hidden space-y-4 transition-all duration-300">
-                                    <div>
-                                        <div class="flex justify-between items-center mb-2">
-                                            <label for="calc-input-impressions" class="text-sm font-medium text-slate-300">Impresiones Servidas</label>
-                                            <span class="text-xs text-slate-500">Anuncios cargados reales</span>
-                                        </div>
-                                        <div class="relative rounded-xl shadow-sm">
-                                            <input type="text" id="calc-input-impressions" value="9,500,000" placeholder="Ej. 8,000,000" 
-                                                   class="block w-full bg-slate-950 border border-slate-800 rounded-xl pl-4 pr-12 py-3 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-md font-semibold">
-                                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-500 font-mono text-sm">IMP</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Guardar Escenario -->
-                            <div class="pt-2">
-                                <div class="flex gap-2">
-                                    <input type="text" id="scenario-name" placeholder="Nombre (ej. Red A, Variante 1)" 
-                                           class="flex-grow bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
-                                    <button onclick="saveScenario()" class="bg-brand-600 hover:bg-brand-500 text-white font-medium px-4 py-2 rounded-xl transition-all text-sm flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                        Guardar
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- Leyenda Informativa -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
-                        <div class="flex justify-between items-center">
-                            <p class="font-semibold text-slate-300 text-sm flex items-center gap-2">
-                                <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                                Diagnóstico por Semáforo
-                            </p>
-                        </div>
-                        <div class="space-y-2 text-xs">
-                            <div class="flex items-center justify-between p-2 rounded bg-rose-950/20 border border-rose-500/20">
-                                <span class="font-bold text-rose-400 flex items-center gap-1.5">🔴 Crítico</span>
-                                <span class="text-slate-400 font-mono">RPM &lt; 0.0001 Y Reqs &gt; 10M</span>
-                            </div>
-                            <div class="flex items-center justify-between p-2 rounded bg-amber-950/20 border border-amber-500/20">
-                                <span class="font-bold text-amber-400 flex items-center gap-1.5">🟡 En riesgo</span>
-                                <span class="text-slate-400 font-mono">RPM &lt; 0.0005 Y Reqs &gt; 5M</span>
-                            </div>
-                            <div class="flex items-center justify-between p-2 rounded bg-slate-950 border border-slate-800">
-                                <span class="font-bold text-slate-300 flex items-center gap-1.5">⚪ Riesgo bajo</span>
-                                <span class="text-slate-400 font-medium text-right">No cumple ambas</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Resultados y Gráficos -->
-                <div class="lg:col-span-7 flex flex-col gap-6">
-                    <!-- Tarjeta Semáforo Dinámico -->
-                    <div id="traffic-light-card" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl transition-all">
-                        <div id="traffic-light-glow" class="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 transition-all duration-500"></div>
-
-                        <div class="flex items-center gap-4 text-center sm:text-left flex-col sm:flex-row w-full">
-                            <div id="traffic-light-indicator" class="relative flex h-14 w-14 items-center justify-center rounded-full bg-slate-950 border transition-all duration-500">
-                                <span id="traffic-light-ping" class="absolute inline-flex h-full w-full rounded-full opacity-30 transition-all duration-500"></span>
-                                <span id="traffic-light-dot" class="relative inline-flex rounded-full h-7 w-7 transition-all duration-500"></span>
-                            </div>
-                            <div>
-                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center justify-center sm:justify-start gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-                                    Auditoría en Tiempo Real
-                                </span>
-                                <h3 id="traffic-light-title" class="text-xl font-bold text-white mt-0.5 tracking-tight">Evaluando...</h3>
-                                <p id="traffic-light-desc" class="text-xs text-slate-400 mt-1 leading-relaxed">Calculando métricas básicas...</p>
-                            </div>
-                        </div>
-
-                        <!-- Límite visual de alerta -->
-                        <div class="hidden sm:block border-l border-slate-800 pl-4 py-2 min-w-[120px] text-right">
-                            <div class="text-[10px] text-slate-500 uppercase font-mono">RPM Actual</div>
-                            <div class="text-sm font-bold text-slate-300 font-mono" id="traffic-light-rpm-val">-</div>
-                            <div class="text-[10px] text-slate-500 uppercase font-mono mt-1">Volumen</div>
-                            <div class="text-sm font-bold text-slate-300 font-mono" id="traffic-light-req-val">-</div>
-                        </div>
-                    </div>
-
-                    <!-- KPIs -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between h-36 group hover:border-slate-700 transition-all shadow-lg">
-                            <div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all"></div>
-                            <div>
-                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">RPM de Solicitud</span>
-                            </div>
-                            <div class="flex items-baseline justify-between mt-4">
-                                <span class="text-3xl font-extrabold text-white tracking-tight" id="result-request-rpm">$0.00</span>
-                                <button onclick="copyToClipboard('result-request-rpm', 'RPM')" class="text-xs text-brand-500 hover:text-brand-400"><svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg></button>
-                            </div>
-                        </div>
-
-                        <div id="card-fillrate" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between h-36 opacity-40 transition-all shadow-lg">
-                            <div>
-                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">Tasa de Relleno (Fill Rate)</span>
-                            </div>
-                            <div class="flex items-baseline justify-between mt-4">
-                                <span class="text-3xl font-extrabold text-white tracking-tight" id="result-fill-rate">0.00%</span>
-                            </div>
-                        </div>
-
-                        <div id="card-impression-rpm" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between h-36 opacity-40 transition-all shadow-lg">
-                            <div>
-                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">RPM de Impresión</span>
-                            </div>
-                            <div class="flex items-baseline justify-between mt-4">
-                                <span class="text-3xl font-extrabold text-white tracking-tight" id="result-impression-rpm">$0.00</span>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between h-36 group hover:border-slate-700 transition-all shadow-lg">
-                            <div>
-                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">Ganancia por Solicitud</span>
-                            </div>
-                            <div class="flex items-baseline justify-between mt-4">
-                                <span class="text-3xl font-extrabold text-slate-200 tracking-tight" id="result-average-val">$0.0000</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Escenarios guardados -->
-                    <div id="scenarios-container" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl transition-all">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-lg font-bold text-white flex items-center gap-2">Historial de Simulación</h3>
-                            <button onclick="clearScenarios()" class="text-xs text-rose-500 hover:text-rose-400">Limpiar todo</button>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                            <div class="md:col-span-7 h-48 relative">
-                                <canvas id="scenario-chart"></canvas>
-                            </div>
-                            <div class="md:col-span-5 max-h-48 overflow-y-auto space-y-2 border-l border-slate-800 pl-4" id="scenarios-list"></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+      <!-- Dashboard Section (Hidden until CSV parsed) -->
+      <div id="dashboard-section" class="hidden flex-col gap-6">
+        
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-white border border-line rounded-xl p-6 flex flex-col gap-3">
+            <span class="text-xs font-medium uppercase tracking-wide text-muted">Audited Sites</span>
+            <span class="text-3xl font-bold text-ink tabular-nums" id="stat-total-sites">0</span>
+          </div>
+          <div class="bg-white border border-line rounded-xl p-6 flex flex-col gap-3">
+            <span class="text-xs font-medium uppercase tracking-wide text-muted">Total Requests</span>
+            <span class="text-3xl font-bold text-ink tabular-nums" id="stat-total-requests">0</span>
+          </div>
+          <div class="bg-white border border-line rounded-xl p-6 flex flex-col gap-3">
+            <span class="text-xs font-medium uppercase tracking-wide text-muted" id="revenue-card-title">Total Revenue</span>
+            <span class="text-3xl font-bold text-ink tabular-nums" id="stat-total-revenue">$0.00</span>
+          </div>
+          <div class="bg-white border border-line rounded-xl p-6 flex flex-col gap-3">
+            <span class="text-xs font-medium uppercase tracking-wide text-muted">Global RPM</span>
+            <span class="text-3xl font-bold text-ink tabular-nums" id="stat-global-rpm">$0.00</span>
+          </div>
         </section>
 
-        <!-- ================= VISTA 2: ANALIZADOR CSV POR SITIO ================= -->
-        <section id="view-analizador" class="hidden space-y-8 transition-all duration-300">
-            <!-- Zona de Carga de Archivo CSV -->
-            <div id="upload-section" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl relative overflow-hidden transition-all">
-                <div class="absolute top-0 right-0 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl"></div>
-                
-                <div class="max-w-2xl mx-auto text-center flex flex-col items-center">
-                    <div class="p-4 bg-slate-950 border border-slate-800 rounded-2xl text-brand-500 mb-4 shadow-inner">
-                        <svg class="w-10 h-10 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-extrabold text-white tracking-tight">Sube tu Reporte de Consola</h2>
-                    <p class="text-xs text-slate-400 mt-2 max-w-md">
-                        Arrastra o selecciona tu archivo <span class="text-slate-200 font-semibold">.csv</span>. Extraeremos automáticamente las columnas <code class="text-brand-500 font-mono font-semibold">Site</code>, <code class="text-brand-500 font-mono font-semibold">Gross Requests</code> y la de ingresos identificada.
-                    </p>
-
-                    <!-- Input Drag-Drop -->
-                    <div class="mt-6 w-full relative">
-                        <input type="file" id="csv-file-input" accept=".csv" class="hidden">
-                        <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-brand-500/60 bg-slate-950/40 hover:bg-slate-950/80 rounded-xl py-8 px-4 cursor-pointer transition-all flex flex-col items-center justify-center gap-2">
-                            <span class="text-sm text-slate-300 font-medium" id="upload-status-text">Presiona para buscar o arrastra el archivo aquí</span>
-                            <span class="text-[11px] text-slate-500">Formato admitido: CSV separado por comas o punto y coma</span>
-                        </div>
-                    </div>
-
-                    <!-- Depurador / Estado del Mapping (Muestra fallas de cabeceras para ayudar al usuario) -->
-                    <div id="mapping-error-log" class="hidden mt-4 w-full p-3 bg-red-950/30 border border-red-500/30 rounded-xl text-left text-xs text-red-300">
-                        <p class="font-bold flex items-center gap-1"><span class="w-2 h-2 bg-red-500 rounded-full"></span> Error de lectura del archivo:</p>
-                        <p id="mapping-error-text" class="mt-1 font-mono text-[11px]"></p>
-                    </div>
-
-                    <div class="flex items-center gap-4 mt-6">
-                        <button onclick="document.getElementById('csv-file-input').click()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-5 py-2.5 rounded-xl transition-all border border-slate-700">
-                            Seleccionar Archivo
-                        </button>
-                        <span class="text-slate-600 text-xs font-bold">O</span>
-                        <button onclick="loadSampleData()" class="bg-brand-500/10 hover:bg-brand-500/20 text-brand-500 text-xs font-bold px-5 py-2.5 rounded-xl transition-all border border-brand-500/30 flex items-center gap-1.5 shadow-[0_0_15px_rgba(34,197,94,0.05)]">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                            Cargar Reporte de Prueba (Demo)
-                        </button>
-                    </div>
-                </div>
+        <section class="flex flex-col gap-3">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <h2 class="text-base font-bold text-ink">2. Results by site</h2>
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+              <input type="text" id="table-search" placeholder="Search site..." class="w-full sm:w-48 px-3 py-2 rounded-lg bg-white border border-line text-sm text-ink placeholder-muted focus:outline-none focus:border-grape focus:ring-2 focus:ring-grape/20">
+              <button id="btn-export-csv" class="shrink-0 text-sm font-medium text-grape hover:text-grape-hover">Download CSV</button>
             </div>
+          </div>
 
-            <!-- Dashboard de Resultados -->
-            <div id="dashboard-section" class="hidden flex flex-col gap-8 transition-all">
-                <!-- Cards Agregados -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Sitios Auditados</span>
-                            <span class="p-1.5 bg-slate-950 border border-slate-800 text-slate-300 rounded-lg text-xs font-mono font-bold" id="stat-total-sites">0</span>
-                        </div>
-                        <div class="mt-4">
-                            <h3 class="text-2xl font-bold text-white tracking-tight" id="stat-active-domain-text">-</h3>
-                            <p class="text-[10px] text-slate-500 mt-1">Registrados en el reporte</p>
-                        </div>
-                    </div>
+          <div class="flex gap-2 mb-2 flex-wrap">
+            <button class="filter-btn px-4 py-1.5 text-sm font-medium rounded-md bg-ink text-white" data-filter="all">All</button>
+            <button class="filter-btn px-4 py-1.5 text-sm font-medium rounded-md bg-white border border-line text-ink hover:border-danger" data-filter="critico">Critical (<span id="count-critico">0</span>)</button>
+            <button class="filter-btn px-4 py-1.5 text-sm font-medium rounded-md bg-white border border-line text-ink hover:border-warn" data-filter="riesgo">At Risk (<span id="count-riesgo">0</span>)</button>
+            <button class="filter-btn px-4 py-1.5 text-sm font-medium rounded-md bg-white border border-line text-ink hover:border-ok" data-filter="bajo">Healthy (<span id="count-bajo">0</span>)</button>
+          </div>
 
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Solicitudes</span>
-                            <span class="p-1.5 bg-slate-950 border border-slate-800 text-brand-500 rounded-lg text-xs font-mono font-bold">REQ</span>
-                        </div>
-                        <div class="mt-4">
-                            <h3 class="text-2xl font-bold text-white tracking-tight" id="stat-total-requests">-</h3>
-                            <p class="text-[10px] text-slate-500 mt-1">Gross Requests totales</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400" id="revenue-card-title">Ingresos Totales (Net net price)</span>
-                            <span class="p-1.5 bg-slate-950 border border-slate-800 text-brand-500 rounded-lg text-xs font-mono font-bold">$ USD</span>
-                        </div>
-                        <div class="mt-4">
-                            <h3 class="text-2xl font-bold text-white tracking-tight" id="stat-total-revenue">-</h3>
-                            <p class="text-[10px] text-slate-500 mt-1">Acumulado del inventario</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Global Request RPM</span>
-                            <span class="p-1.5 bg-slate-950 border border-slate-800 text-brand-500 rounded-lg text-xs font-mono font-bold">RPM</span>
-                        </div>
-                        <div class="mt-4">
-                            <h3 class="text-2xl font-bold text-white tracking-tight" id="stat-global-rpm">-</h3>
-                            <p class="text-[10px] text-slate-500 mt-1">Promedio de red</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Control Semáforo Interactivo -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Filtrado rápido por Semáforo</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <button onclick="setAuditFilter('critico')" id="btn-filter-critico" class="bg-slate-950/40 hover:bg-slate-950 border border-slate-800 p-4 rounded-xl flex items-center justify-between transition-all text-left">
-                            <div class="flex items-center gap-3">
-                                <span class="relative flex h-4 w-4">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-4 w-4 bg-rose-500"></span>
-                                </span>
-                                <div>
-                                    <h4 class="text-sm font-bold text-slate-200">Crítico</h4>
-                                    <p class="text-[10px] text-slate-500">RPM &lt; 0.0001 Y Reqs &gt; 10M</p>
-                                </div>
-                            </div>
-                            <span class="text-2xl font-black text-rose-500" id="badge-count-critico">0</span>
-                        </button>
-
-                        <button onclick="setAuditFilter('riesgo')" id="btn-filter-riesgo" class="bg-slate-950/40 hover:bg-slate-950 border border-slate-800 p-4 rounded-xl flex items-center justify-between transition-all text-left">
-                            <div class="flex items-center gap-3">
-                                <span class="relative flex h-4 w-4">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-4 w-4 bg-amber-500"></span>
-                                </span>
-                                <div>
-                                    <h4 class="text-sm font-bold text-slate-200">En riesgo</h4>
-                                    <p class="text-[10px] text-slate-500">RPM &lt; 0.0005 Y Reqs &gt; 5M</p>
-                                </div>
-                            </div>
-                            <span class="text-2xl font-black text-amber-500" id="badge-count-riesgo">0</span>
-                        </button>
-
-                        <button onclick="setAuditFilter('bajo')" id="btn-filter-bajo" class="bg-slate-950/40 hover:bg-slate-950 border border-slate-800 p-4 rounded-xl flex items-center justify-between transition-all text-left">
-                            <div class="flex items-center gap-3">
-                                <span class="h-4 w-4 rounded-full bg-slate-400 inline-block"></span>
-                                <div>
-                                    <h4 class="text-sm font-bold text-slate-200">Riesgo bajo</h4>
-                                    <p class="text-[10px] text-slate-500">Funcionamiento estable</p>
-                                </div>
-                            </div>
-                            <span class="text-2xl font-black text-slate-400" id="badge-count-bajo">0</span>
-                        </button>
-                    </div>
-
-                    <div class="flex justify-end mt-3">
-                        <button onclick="setAuditFilter('all')" id="btn-reset-filter" class="hidden text-xs text-brand-500 hover:text-brand-400 font-medium flex items-center gap-1.5 transition-all">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            Quitar filtros de semáforo (Mostrar todos)
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Distribución y desglose -->
-                <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-                    <!-- Tabla de Sitios -->
-                    <div class="xl:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col gap-4">
-                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                            <div>
-                                <h3 class="text-md font-bold text-white tracking-tight">Desglose de Sitios Analizados</h3>
-                                <p class="text-xs text-slate-500">Haz clic en los encabezados para ordenar</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <input type="text" id="table-search" placeholder="Buscar sitio..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand-500 transition-all min-w-[180px]">
-                                <button onclick="exportToCSV()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2 rounded-xl border border-slate-700 flex items-center gap-1.5 transition-all">
-                                    <svg class="w-3.5 h-3.5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                    Exportar CSV
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Tabla responsive -->
-                        <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/40">
-                            <table class="min-w-full divide-y divide-slate-800 text-left text-sm">
-                                <thead class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                                    <tr>
-                                        <th scope="col" class="px-4 py-3.5 cursor-pointer hover:text-white" onclick="sortTable('status')">Semáforo</th>
-                                        <th scope="col" class="px-4 py-3.5 cursor-pointer hover:text-white" onclick="sortTable('site')">Sitio</th>
-                                        <th scope="col" class="px-4 py-3.5 text-right cursor-pointer hover:text-white" onclick="sortTable('requests')">Gross Requests</th>
-                                        <th scope="col" class="px-4 py-3.5 text-right cursor-pointer hover:text-white" onclick="sortTable('revenue')" id="revenue-column-header">Net net price</th>
-                                        <th scope="col" class="px-4 py-3.5 text-right cursor-pointer hover:text-white" onclick="sortTable('rpm')">RPM</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-800/60" id="sites-table-body"></tbody>
-                            </table>
-                        </div>
-
-                        <!-- Paginación -->
-                        <div class="flex justify-between items-center text-xs text-slate-500 px-1">
-                            <span id="table-pagination-info">Mostrando 0 sitios</span>
-                            <div class="flex gap-2">
-                                <button id="btn-table-prev" onclick="changePage(-1)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 disabled:opacity-30 disabled:pointer-events-none transition-all">Anterior</button>
-                                <button id="btn-table-next" onclick="changePage(1)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 disabled:opacity-30 disabled:pointer-events-none transition-all">Siguiente</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Gráfico y Metadatos -->
-                    <div class="xl:col-span-4 flex flex-col gap-6">
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Top 10 Sitios por Volumen</h3>
-                            <div class="h-64 relative">
-                                <canvas id="chart-rpm-ranking"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl text-xs text-slate-400 space-y-4">
-                            <h4 class="font-bold text-white uppercase tracking-wider">Detalles del Reporte</h4>
-                            <div class="space-y-2.5 font-mono text-[11px]">
-                                <div class="flex justify-between py-1 border-b border-slate-800/60">
-                                    <span>Nombre:</span>
-                                    <span class="text-white truncate max-w-[150px]" id="info-file-name">Ninguno</span>
-                                </div>
-                                <div class="flex justify-between py-1 border-b border-slate-800/60">
-                                    <span>Tamaño:</span>
-                                    <span class="text-white" id="info-file-size">-</span>
-                                </div>
-                                <div class="flex justify-between py-1 border-b border-slate-800/60">
-                                    <span>Filas procesadas:</span>
-                                    <span class="text-white" id="info-file-rows">0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
+          <div class="overflow-x-auto border border-line rounded-xl bg-white">
+            <table class="w-full text-sm">
+              <thead class="bg-canvas border-b border-line">
+                <tr class="text-xs font-medium uppercase tracking-wide text-muted">
+                  <th class="px-4 py-3 text-left cursor-pointer hover:text-ink select-none" data-sort="status">Status ↕</th>
+                  <th class="px-4 py-3 text-left cursor-pointer hover:text-ink select-none" data-sort="site">Site ↕</th>
+                  <th class="px-4 py-3 text-right cursor-pointer hover:text-ink select-none" data-sort="requests">Requests ↕</th>
+                  <th class="px-4 py-3 text-right cursor-pointer hover:text-ink select-none" data-sort="revenue" id="revenue-column-header">Revenue ↕</th>
+                  <th class="px-4 py-3 text-right cursor-pointer hover:text-ink select-none" data-sort="rpm">RPM ↕</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-line" id="sites-table-body">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="flex justify-between items-center text-xs text-muted px-1 mt-1">
+            <span id="table-pagination-info">Showing 0 sites</span>
+            <div class="flex gap-2">
+              <button id="btn-table-prev" class="px-3 py-1 rounded bg-white border border-line hover:border-grape text-ink disabled:opacity-40 disabled:cursor-not-allowed">Previous</button>
+              <button id="btn-table-next" class="px-3 py-1 rounded bg-white border border-line hover:border-grape text-ink disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
             </div>
-
+          </div>
         </section>
 
-    </main>
+        <section class="bg-white border border-line rounded-xl p-6 flex flex-col gap-4">
+          <h2 class="text-base font-bold text-ink">Top 10 Sites by Volume</h2>
+          <div class="h-64 relative w-full">
+            <canvas id="chart-rpm-ranking"></canvas>
+          </div>
+        </section>
+      </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-800 bg-slate-950 py-8 text-center text-xs text-slate-500">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p>&copy; 2026 Plataforma de Control RPM. Todos los derechos reservados.</p>
-            <div class="flex gap-4">
-                <a href="#" class="hover:text-white transition-all">Términos de Servicio</a>
-                <a href="#" class="hover:text-white transition-all">Política de Privacidad</a>
-            </div>
-        </div>
-    </footer>
+    </div>
+  </main>
 
-    <!-- Script General de Lógica unificada -->
-    <script>
-        // ================= ESTADO GLOBAL =================
-        let activeTab = 'calculadora';
-        let currentCurrency = 'USD';
+  <div id="toast" class="hidden fixed top-4 right-4 bg-ink text-white text-sm px-4 py-3 rounded-lg shadow-lg z-50"></div>
+
+  <script>
+    // Global Chart.js config per Style Guide
+    Chart.defaults.font.family = 'Inter';
+    Chart.defaults.color = '#5B5773';
+
+    // UI Elements
+    const toast = document.getElementById('toast');
+    const tabCalcBtn = document.getElementById('tab-btn-calculadora');
+    const tabAnalizBtn = document.getElementById('tab-btn-analizador');
+    const viewCalc = document.getElementById('view-calculadora');
+    const viewAnaliz = document.getElementById('view-analizador');
+    
+    // Tab Logic
+    tabCalcBtn.addEventListener('click', () => switchTab('calculadora'));
+    tabAnalizBtn.addEventListener('click', () => switchTab('analizador'));
+
+    function switchTab(tab) {
+      if (tab === 'calculadora') {
+        viewCalc.classList.remove('hidden');
+        viewCalc.classList.add('flex');
+        viewAnaliz.classList.add('hidden');
+        viewAnaliz.classList.remove('flex');
         
-        // Simbolos de moneda soportados
-        const currencySymbols = {
-            USD: '$',
-            EUR: '€',
-            MXN: 'Mex$',
-            ARS: 'Ar$',
-            COP: 'Col$'
-        };
+        tabCalcBtn.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white text-ink";
+        tabAnalizBtn.className = "px-4 py-1.5 text-sm font-medium rounded-md text-white/70 hover:text-white";
+      } else {
+        viewCalc.classList.add('hidden');
+        viewCalc.classList.remove('flex');
+        viewAnaliz.classList.remove('hidden');
+        viewAnaliz.classList.add('flex');
+        
+        tabCalcBtn.className = "px-4 py-1.5 text-sm font-medium rounded-md text-white/70 hover:text-white";
+        tabAnalizBtn.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white text-ink";
+        
+        if (parsedSitesData.length > 0) renderAnalyzerChart();
+      }
+    }
 
-        // Pesos semánticos del semáforo para ordenamiento (Crítico -> Riesgo -> Bajo)
-        const statusWeights = {
-            'critico': 1,
-            'riesgo': 2,
-            'bajo': 3
-        };
+    function showToast(message, isError = false) {
+      toast.innerText = message;
+      toast.className = `fixed top-4 right-4 text-white text-sm px-4 py-3 rounded-lg shadow-lg z-50 ${isError ? 'bg-danger' : 'bg-ink'}`;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
 
-        // ================= ESTADO DE VISTA 1: CALCULADORA =================
-        let isAdvancedMode = false;
-        let calcScenarios = [];
-        let scenarioChart = null;
+    // Calculator Logic
+    let calcScenarios = [];
+    let scenarioChart = null;
 
-        const elCalcRequests = document.getElementById('calc-input-requests');
-        const elCalcRevenue = document.getElementById('calc-input-revenue');
-        const elCalcImpressions = document.getElementById('calc-input-impressions');
-        const elCurrencySelect = document.getElementById('currency-select');
+    const elCalcRequests = document.getElementById('calc-input-requests');
+    const elCalcRevenue = document.getElementById('calc-input-revenue');
+    const elCurrencySelect = document.getElementById('currency-select');
+    
+    function formatInputValue(input, isDecimal) {
+      let cursor = input.selectionStart;
+      let oldLen = input.value.length;
+      let val = input.value.replace(/[^0-9.]/g, '');
+      
+      if (isDecimal) {
+        let parts = val.split('.');
+        if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
+      } else {
+        val = val.split('.')[0];
+      }
+      
+      if (val === '') {
+        input.value = '';
+        return;
+      }
+      
+      let parts = val.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      let formatted = parts.join('.');
+      
+      input.value = formatted;
+      cursor += (formatted.length - oldLen);
+      input.setSelectionRange(cursor, cursor);
+    }
 
-        // ================= ESTADO DE VISTA 2: ANALIZADOR =================
-        let parsedSitesData = [];   
-        let filteredSitesData = []; 
-        let currentFilterStatus = 'all'; 
-        let currentSortColumn = 'status'; // Ordenación predeterminada por semáforo
-        let currentSortDirection = 'asc'; // Ordenación de mayor severidad (Crítico -> Riesgo -> Bajo)
-        let analyzerChartInstance = null;
-        let currentPage = 1;
-        const rowsPerPage = 15;
+    function getRawValue(el) {
+      return parseFloat(el.value.replace(/,/g, '')) || 0;
+    }
 
-        // Nombre de la columna de ingresos detectada de forma dinámica
-        let detectedRevenueColumn = 'Net net price';
+    function formatCurrency(val) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: elCurrencySelect.value, minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(val);
+    }
 
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('csv-file-input');
-        const searchInput = document.getElementById('table-search');
+    elCalcRequests.addEventListener('input', (e) => { formatInputValue(e.target, false); calculateRPMCalc(); });
+    elCalcRevenue.addEventListener('input', (e) => { formatInputValue(e.target, true); calculateRPMCalc(); });
+    elCurrencySelect.addEventListener('change', () => {
+      document.querySelectorAll('.currency-symbol').forEach(el => el.innerText = elCurrencySelect.options[elCurrencySelect.selectedIndex].text.split(' ')[0] === 'USD' ? '$' : elCurrencySelect.options[elCurrencySelect.selectedIndex].text.split('(')[1].replace(')',''));
+      calculateRPMCalc();
+      if(parsedSitesData.length > 0) calculateAggregatesAndRender();
+    });
 
+    function updateTrafficLight(rpm, requests) {
+      const badge = document.getElementById('traffic-light-badge');
+      const title = document.getElementById('traffic-light-title');
+      const desc = document.getElementById('traffic-light-desc');
+      const dot = badge.querySelector('span');
 
-        // ================= MANEJO DE PESTAÑAS (NAVEGACIÓN INTERNA) =================
-        function switchTab(tab) {
-            activeTab = tab;
-            const viewCalc = document.getElementById('view-calculadora');
-            const viewAnaliz = document.getElementById('view-analizador');
-            
-            const btnCalc = document.getElementById('tab-btn-calculadora');
-            const btnAnaliz = document.getElementById('tab-btn-analizador');
-            
-            const btnMobCalc = document.getElementById('tab-mob-calculadora');
-            const btnMobAnaliz = document.getElementById('tab-mob-analizador');
+      badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium";
 
-            if (tab === 'calculadora') {
-                viewCalc.classList.remove('hidden');
-                viewAnaliz.classList.add('hidden');
-                
-                // Botón escritorio
-                btnCalc.className = "px-4 py-1.5 text-xs font-semibold rounded-lg bg-brand-500/10 text-brand-500 border border-brand-500/20 transition-all font-bold";
-                btnAnaliz.className = "px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-all";
-                
-                // Botón móvil
-                btnMobCalc.className = "text-xs font-bold text-brand-500 transition-all";
-                btnMobAnaliz.className = "text-xs font-semibold text-slate-400 hover:text-white transition-all";
-            } else {
-                viewCalc.classList.add('hidden');
-                viewAnaliz.classList.remove('hidden');
-                
-                // Botón escritorio
-                btnCalc.className = "px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-all";
-                btnAnaliz.className = "px-4 py-1.5 text-xs font-semibold rounded-lg bg-brand-500/10 text-brand-500 border border-brand-500/20 transition-all font-bold";
-                
-                // Botón móvil
-                btnMobCalc.className = "text-xs font-semibold text-slate-400 hover:text-white transition-all";
-                btnMobAnaliz.className = "text-xs font-bold text-brand-500 transition-all";
+      if (rpm < 0.0001 && requests > 10000000) {
+        badge.classList.add('bg-danger-soft', 'text-danger');
+        dot.className = "h-2 w-2 rounded-full bg-current";
+        title.innerText = "Critical";
+        desc.innerText = "Massive unmonetized traffic! RPM < 0.0001 and very low revenue for this volume.";
+      } else if (rpm < 0.0005 && requests > 5000000) {
+        badge.classList.add('bg-warn-soft', 'text-warn');
+        dot.className = "h-2 w-2 rounded-full bg-current";
+        title.innerText = "At risk";
+        desc.innerText = "Poor performance. RPM < 0.0005 with a considerable traffic volume.";
+      } else {
+        badge.classList.add('bg-ok-soft', 'text-ok');
+        dot.className = "h-2 w-2 rounded-full bg-current";
+        title.innerText = "Healthy";
+        desc.innerText = "Traffic and revenue do not meet critical or moderate risk conditions.";
+      }
+    }
 
-                // Redibujar gráfico del analizador para evitar bugs de contenedor hidden
-                if (parsedSitesData.length > 0) {
-                    setTimeout(renderAnalyzerChart, 50);
-                }
-            }
+    function calculateRPMCalc() {
+      const requests = getRawValue(elCalcRequests);
+      const revenue = getRawValue(elCalcRevenue);
+
+      const requestRPM = requests > 0 ? (revenue / requests) * 1000 : 0;
+      document.getElementById('result-request-rpm').innerText = formatCurrency(requestRPM);
+      document.getElementById('result-average-val').innerText = formatCurrency(requests > 0 ? (revenue / requests) : 0);
+
+      updateTrafficLight(requestRPM, requests);
+    }
+
+    document.getElementById('btn-save-scenario').addEventListener('click', () => {
+      const name = document.getElementById('scenario-name').value.trim() || `Scenario ${calcScenarios.length + 1}`;
+      const requests = getRawValue(elCalcRequests);
+      const revenue = getRawValue(elCalcRevenue);
+      const rpm = requests > 0 ? (revenue / requests) * 1000 : 0;
+      
+      calcScenarios.push({ id: Date.now(), name, requests, revenue, rpm });
+      document.getElementById('scenario-name').value = '';
+      
+      document.getElementById('scenarios-container').classList.remove('hidden');
+      document.getElementById('scenarios-container').classList.add('flex');
+      updateScenariosUI();
+      showToast("Scenario saved.");
+    });
+
+    document.getElementById('btn-clear-scenarios').addEventListener('click', () => {
+      calcScenarios = [];
+      updateScenariosUI();
+    });
+
+    function updateScenariosUI() {
+      const list = document.getElementById('scenarios-list');
+      list.innerHTML = '';
+      
+      calcScenarios.forEach(sc => {
+        list.innerHTML += `
+          <div class="p-3 border border-line rounded-lg flex justify-between items-center text-sm">
+            <div class="flex flex-col">
+              <span class="font-bold text-ink">${sc.name}</span>
+              <span class="text-xs text-muted">Req: ${sc.requests.toLocaleString()} | Rev: ${formatCurrency(sc.revenue)}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="font-bold text-grape">${formatCurrency(sc.rpm)} RPM</span>
+              <button onclick="deleteScenario(${sc.id})" class="text-muted hover:text-danger">&times;</button>
+            </div>
+          </div>
+        `;
+      });
+      
+      if (calcScenarios.length === 0) {
+        document.getElementById('scenarios-container').classList.add('hidden');
+        document.getElementById('scenarios-container').classList.remove('flex');
+      } else {
+        renderScenarioChart();
+      }
+    }
+
+    window.deleteScenario = function(id) {
+      calcScenarios = calcScenarios.filter(s => s.id !== id);
+      updateScenariosUI();
+    }
+
+    function renderScenarioChart() {
+      const ctx = document.getElementById('scenario-chart').getContext('2d');
+      if (scenarioChart) scenarioChart.destroy();
+      
+      scenarioChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: calcScenarios.map(s => s.name),
+          datasets: [{
+            label: 'RPM',
+            data: calcScenarios.map(s => s.rpm),
+            backgroundColor: '#611BC5',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { grid: { color: '#D3DCF2' } },
+            x: { grid: { display: false } }
+          }
         }
+      });
+    }
 
-        // ================= PARSEADORES Y UTILIDADES CSV AVANZADOS =================
-        // Helper para normalizar cabeceras de CSV (remueve BOM, comillas y espacios de forma segura)
-        const cleanHeader = (h) => {
-            if (!h) return '';
-            return h.toString()
-                    .replace(/^\uFEFF/, '')       // Remueve Byte Order Mark
-                    .replace(/["']/g, '')         // Remueve comillas duplicadas
-                    .trim()
-                    .toLowerCase();
-        };
+    // CSV Analyzer Logic
+    let parsedSitesData = [];
+    let filteredSitesData = [];
+    let currentFilter = 'all';
+    let sortCol = 'status';
+    let sortAsc = true;
+    let analyzerChart = null;
+    let currentPage = 1;
+    const rowsPerPage = 15;
+    let detectedRevenueColumn = 'Net net price';
+    let pendingFileToProcess = null;
 
-        // Helper para parsear números con formatos híbridos (Americanos y Europeos como "16,20")
-        function parseCleanNumber(val) {
-            if (val === undefined || val === null || val === '') return 0;
-            let s = val.toString().trim().replace(/["']/g, '');
-            
-            const lastCommaIndex = s.lastIndexOf(',');
-            const lastDotIndex = s.lastIndexOf('.');
-            const lastSeparatorIndex = Math.max(lastCommaIndex, lastDotIndex);
-            
-            if (lastSeparatorIndex !== -1) {
-                const charsAfter = s.length - 1 - lastSeparatorIndex;
-                // En AdTech solemos tener entre 1 y 4 decimales
-                if (charsAfter === 1 || charsAfter === 2 || charsAfter === 4) {
-                    let integerPart = s.substring(0, lastSeparatorIndex).replace(/[,.]/g, '');
-                    let decimalPart = s.substring(lastSeparatorIndex + 1);
-                    s = integerPart + '.' + decimalPart;
-                } else {
-                    // Es muy probable que sea separador de miles
-                    s = s.replace(/[,.]/g, '');
-                }
-            }
-            
-            s = s.replace(/[^0-9.-]/g, '');
-            const num = parseFloat(s);
-            return isNaN(num) ? 0 : num;
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('csv-file-input');
+    const btnProcessFile = document.getElementById('btn-process-file');
+
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-grape'); });
+    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-grape'); });
+    dropZone.addEventListener('drop', (e) => { 
+      e.preventDefault(); 
+      dropZone.classList.remove('border-grape'); 
+      if (e.dataTransfer.files[0]) prepareFile(e.dataTransfer.files[0]); 
+    });
+    fileInput.addEventListener('change', (e) => { 
+      if (e.target.files[0]) prepareFile(e.target.files[0]); 
+    });
+
+    function prepareFile(file) {
+      if (!file) return;
+      pendingFileToProcess = file;
+      document.getElementById('upload-status-text').innerText = `Selected: ${file.name}`;
+      btnProcessFile.classList.remove('hidden');
+    }
+
+    btnProcessFile.addEventListener('click', () => {
+      if(pendingFileToProcess) handleFile(pendingFileToProcess);
+    });
+
+    function handleFile(file) {
+      if (!file) return;
+      document.getElementById('upload-status-text').innerText = `Analyzing ${file.name}...`;
+      
+      Papa.parse(file, {
+        header: false,
+        skipEmptyLines: true,
+        complete: function(res) { processCSV(res.data, file.name); },
+        error: function(err) { showToast("Processing error: " + err.message, true); }
+      });
+    }
+
+    function cleanStr(str) { return str ? str.toString().replace(/^\uFEFF/, '').replace(/["']/g, '').trim().toLowerCase() : ''; }
+    function parseNum(val) {
+      if(!val) return 0;
+      let s = val.toString().trim().replace(/["']/g, '');
+      let lastSep = Math.max(s.lastIndexOf(','), s.lastIndexOf('.'));
+      if(lastSep !== -1) {
+        let charsAfter = s.length - 1 - lastSep;
+        if(charsAfter === 1 || charsAfter === 2 || charsAfter === 4) {
+          s = s.substring(0, lastSep).replace(/[,.]/g, '') + '.' + s.substring(lastSep + 1);
+        } else {
+          s = s.replace(/[,.]/g, '');
         }
+      }
+      return parseFloat(s.replace(/[^0-9.-]/g, '')) || 0;
+    }
 
-        // ================= FORMATOS Y UTILIDADES =================
-        function formatInputValue(input, isDecimal = false) {
-            let cursorPosition = input.selectionStart;
-            let originalLength = input.value.length;
-
-            let value = input.value.replace(/[^0-9.]/g, '');
-            if (isDecimal) {
-                const parts = value.split('.');
-                if (parts.length > 2) {
-                    value = parts[0] + '.' + parts.slice(1).join('');
-                }
-            } else {
-                value = value.split('.')[0];
-            }
-
-            if (value === '') {
-                input.value = '';
-                return;
-            }
-
-            const parts = value.split('.');
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            let formattedValue = parts.join('.');
-
-            input.value = formattedValue;
-            let newLength = formattedValue.length;
-            cursorPosition = cursorPosition + (newLength - originalLength);
-            input.setSelectionRange(cursorPosition, cursorPosition);
+    function processCSV(data, filename) {
+      let headIdx = -1;
+      for (let i = 0; i < Math.min(20, data.length); i++) {
+        let rowStr = data[i].join(',').toLowerCase();
+        if ((rowStr.includes('site') || rowStr.includes('domain') || rowStr.includes('app bundle')) && rowStr.includes('requests')) {
+          headIdx = i; break;
         }
+      }
 
-        function getRawValue(element) {
-            return parseFloat(element.value.replace(/,/g, '')) || 0;
+      const errLog = document.getElementById('mapping-error-log');
+      if (headIdx === -1) {
+        document.getElementById('mapping-error-text').innerText = "Missing mandatory columns (Site, Requests).";
+        errLog.classList.remove('hidden');
+        showToast("Invalid format.", true);
+        return;
+      }
+
+      const headers = data[headIdx].map(cleanStr);
+      const siteCol = headers.findIndex(h => h === 'site' || h === 'sitio' || h === 'domain' || h === 'app bundle');
+      const reqCol = headers.findIndex(h => h === 'gross requests' || h === 'requests');
+      let revCol = headers.findIndex(h => h === 'revenue' || h === 'net net price' || h === 'net price');
+      if (revCol === -1) revCol = headers.findIndex(h => h === 'gross price' || h === 'price');
+
+      if (siteCol === -1 || reqCol === -1 || revCol === -1) {
+        document.getElementById('mapping-error-text').innerText = "Check your headers. Detected: " + headers.join(', ');
+        errLog.classList.remove('hidden');
+        showToast("Columns not detected.", true);
+        return;
+      }
+
+      errLog.classList.add('hidden');
+      detectedRevenueColumn = data[headIdx][revCol].replace(/["']/g, '');
+      document.getElementById('revenue-column-header').innerText = detectedRevenueColumn + " ↕";
+      document.getElementById('revenue-card-title').innerText = detectedRevenueColumn;
+
+      parsedSitesData = [];
+      for (let i = headIdx + 1; i < data.length; i++) {
+        if (data[i].length <= Math.max(siteCol, reqCol, revCol)) continue;
+        const site = data[i][siteCol] ? data[i][siteCol].toString().replace(/["']/g, '').trim() : `Item #${i}`;
+        const reqs = parseNum(data[i][reqCol]);
+        const rev = parseNum(data[i][revCol]);
+        
+        if (reqs > 0) {
+          const rpm = (rev / reqs) * 1000;
+          let status = 'bajo';
+          if (rpm < 0.0001 && reqs > 10000000) status = 'critico';
+          else if (rpm < 0.0005 && reqs > 5000000) status = 'riesgo';
+          parsedSitesData.push({ site, requests: reqs, revenue: rev, rpm, status });
         }
+      }
 
-        function formatCurrency(value) {
-            const currency = elCurrencySelect.value;
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: currency,
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 4
-            }).format(value);
-        }
+      if (parsedSitesData.length === 0) {
+        showToast("No valid numerical data found.", true); return;
+      }
 
-        function formatPercent(value) {
-            return new Intl.NumberFormat('es-ES', {
-                style: 'percent',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(value / 100);
-        }
+      document.getElementById('upload-status-text').innerHTML = `Report loaded: <strong>${filename}</strong>`;
+      document.getElementById('dashboard-section').classList.remove('hidden');
+      document.getElementById('dashboard-section').classList.add('flex');
+      
+      calculateAggregatesAndRender();
+      showToast("Report successfully analyzed.");
+    }
 
-        // ================= EVENTOS Y LISTENERS COMPARTIDOS =================
-        elCurrencySelect.addEventListener('change', () => {
-            currentCurrency = elCurrencySelect.value;
-            document.querySelectorAll('.currency-symbol').forEach(el => {
-                el.innerText = currencySymbols[currentCurrency] || '$';
-            });
-            calculateRPMCalc();
-            if (parsedSitesData.length > 0) {
-                calculateAggregatesAndRender();
-            }
+    function calculateAggregatesAndRender() {
+      let tReq = 0, tRev = 0, cCrit = 0, cRies = 0, cBajo = 0;
+      parsedSitesData.forEach(s => {
+        tReq += s.requests; tRev += s.revenue;
+        if (s.status === 'critico') cCrit++;
+        else if (s.status === 'riesgo') cRies++;
+        else cBajo++;
+      });
+
+      document.getElementById('stat-total-sites').innerText = parsedSitesData.length.toLocaleString();
+      document.getElementById('stat-total-requests').innerText = tReq.toLocaleString();
+      document.getElementById('stat-total-revenue').innerText = formatCurrency(tRev);
+      document.getElementById('stat-global-rpm').innerText = formatCurrency(tReq > 0 ? (tRev / tReq) * 1000 : 0);
+
+      document.getElementById('count-critico').innerText = cCrit;
+      document.getElementById('count-riesgo').innerText = cRies;
+      document.getElementById('count-bajo').innerText = cBajo;
+
+      applyFiltersAndRender();
+    }
+
+    // Filters
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.className = "filter-btn px-4 py-1.5 text-sm font-medium rounded-md bg-white border border-line text-ink hover:border-danger";
         });
+        e.target.className = "filter-btn px-4 py-1.5 text-sm font-medium rounded-md bg-ink text-white";
+        currentFilter = e.target.getAttribute('data-filter');
+        currentPage = 1;
+        applyFiltersAndRender();
+      });
+    });
 
+    document.getElementById('table-search').addEventListener('input', () => { currentPage = 1; applyFiltersAndRender(); });
 
-        // ================= LÓGICA VISTA 1: CALCULADORA =================
-        elCalcRequests.addEventListener('input', (e) => {
-            formatInputValue(e.target, false);
-            calculateRPMCalc();
-        });
-        elCalcRevenue.addEventListener('input', (e) => {
-            formatInputValue(e.target, true);
-            calculateRPMCalc();
-        });
-        elCalcImpressions.addEventListener('input', (e) => {
-            formatInputValue(e.target, false);
-            calculateRPMCalc();
-        });
+    // Sort
+    const statusWeights = { 'critico': 1, 'riesgo': 2, 'bajo': 3 };
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        let col = th.getAttribute('data-sort');
+        if (sortCol === col) sortAsc = !sortAsc;
+        else { sortCol = col; sortAsc = (col === 'status') ? true : false; }
+        applyFiltersAndRender();
+      });
+    });
 
-        function calculateRPMCalc() {
-            const requests = getRawValue(elCalcRequests);
-            const revenue = getRawValue(elCalcRevenue);
-            const impressions = getRawValue(elCalcImpressions);
+    function applyFiltersAndRender() {
+      let query = document.getElementById('table-search').value.toLowerCase();
+      filteredSitesData = parsedSitesData.filter(s => {
+        let mq = s.site.toLowerCase().includes(query);
+        let ms = (currentFilter === 'all') || (s.status === currentFilter);
+        return mq && ms;
+      });
 
-            const requestRPM = requests > 0 ? (revenue / requests) * 1000 : 0;
-            document.getElementById('result-request-rpm').innerText = formatCurrency(requestRPM);
-
-            const averageRevenue = requests > 0 ? (revenue / requests) : 0;
-            document.getElementById('result-average-val').innerText = formatCurrency(averageRevenue);
-
-            if (isAdvancedMode) {
-                const fillRate = (requests > 0 && impressions > 0) ? (impressions / requests) * 100 : 0;
-                document.getElementById('result-fill-rate').innerText = formatPercent(fillRate);
-
-                const impressionRPM = impressions > 0 ? (revenue / impressions) * 1000 : 0;
-                document.getElementById('result-impression-rpm').innerText = formatCurrency(impressionRPM);
-            } else {
-                document.getElementById('result-fill-rate').innerText = "---";
-                document.getElementById('result-impression-rpm').innerText = "---";
-            }
-
-            updateTrafficLight(requestRPM, requests);
+      filteredSitesData.sort((a, b) => {
+        if (sortCol === 'status') {
+          return sortAsc ? (statusWeights[a.status] - statusWeights[b.status]) : (statusWeights[b.status] - statusWeights[a.status]);
         }
+        if (typeof a[sortCol] === 'string') return sortAsc ? a[sortCol].localeCompare(b[sortCol]) : b[sortCol].localeCompare(a[sortCol]);
+        return sortAsc ? a[sortCol] - b[sortCol] : b[sortCol] - a[sortCol];
+      });
 
-        function toggleAdvancedMode() {
-            isAdvancedMode = !isAdvancedMode;
-            const container = document.getElementById('advanced-container');
-            const toggleCircle = document.getElementById('toggle-circle');
-            const toggleBtn = document.getElementById('toggle-advanced');
-            const cardFillRate = document.getElementById('card-fillrate');
-            const cardImpRPM = document.getElementById('card-impression-rpm');
+      renderTable();
+      renderAnalyzerChart();
+    }
 
-            if (isAdvancedMode) {
-                container.classList.remove('hidden');
-                toggleCircle.classList.replace('translate-x-0', 'translate-x-5');
-                toggleCircle.classList.replace('bg-slate-400', 'bg-white');
-                toggleBtn.classList.replace('bg-slate-800', 'bg-brand-600');
-                cardFillRate.classList.remove('opacity-40');
-                cardImpRPM.classList.remove('opacity-40');
-            } else {
-                container.classList.add('hidden');
-                toggleCircle.classList.replace('translate-x-5', 'translate-x-0');
-                toggleCircle.classList.replace('bg-white', 'bg-slate-400');
-                toggleBtn.classList.replace('bg-brand-600', 'bg-slate-800');
-                cardFillRate.classList.add('opacity-40');
-                cardImpRPM.classList.add('opacity-40');
-            }
-            calculateRPMCalc();
+    function renderTable() {
+      const tbody = document.getElementById('sites-table-body');
+      tbody.innerHTML = '';
+      
+      let start = (currentPage - 1) * rowsPerPage;
+      let end = start + rowsPerPage;
+      let pageData = filteredSitesData.slice(start, end);
+
+      pageData.forEach(item => {
+        let badge = '';
+        if (item.status === 'critico') badge = `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-danger-soft text-danger"><span class="h-1.5 w-1.5 rounded-full bg-current"></span>Critical</span>`;
+        else if (item.status === 'riesgo') badge = `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-warn-soft text-warn"><span class="h-1.5 w-1.5 rounded-full bg-current"></span>At risk</span>`;
+        else badge = `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-ok-soft text-ok"><span class="h-1.5 w-1.5 rounded-full bg-current"></span>Healthy</span>`;
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-canvas">
+            <td class="px-4 py-3">${badge}</td>
+            <td class="px-4 py-3 font-medium text-ink max-w-[200px] truncate" title="${item.site}">${item.site}</td>
+            <td class="px-4 py-3 text-right font-mono text-xs tabular-nums">${item.requests.toLocaleString()}</td>
+            <td class="px-4 py-3 text-right font-mono text-xs tabular-nums">${formatCurrency(item.revenue)}</td>
+            <td class="px-4 py-3 text-right font-mono text-xs tabular-nums font-bold">${formatCurrency(item.rpm)}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('table-pagination-info').innerText = `Showing ${filteredSitesData.length > 0 ? start + 1 : 0} to ${Math.min(end, filteredSitesData.length)} of ${filteredSitesData.length}`;
+      document.getElementById('btn-table-prev').disabled = currentPage === 1;
+      document.getElementById('btn-table-next').disabled = end >= filteredSitesData.length;
+    }
+
+    document.getElementById('btn-table-prev').addEventListener('click', () => { currentPage--; renderTable(); });
+    document.getElementById('btn-table-next').addEventListener('click', () => { currentPage++; renderTable(); });
+
+    function renderAnalyzerChart() {
+      const ctx = document.getElementById('chart-rpm-ranking').getContext('2d');
+      let top10 = [...parsedSitesData].sort((a,b) => b.requests - a.requests).slice(0, 10);
+      
+      if (analyzerChart) analyzerChart.destroy();
+      analyzerChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: top10.map(s => s.site.split(' - ')[0].substring(0, 20)),
+          datasets: [{
+            data: top10.map(s => s.rpm),
+            backgroundColor: top10.map(s => s.status === 'critico' ? '#D6283B' : (s.status === 'riesgo' ? '#B86E00' : '#0F8A5F')),
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: '#D3DCF2' } },
+            y: { grid: { display: false } }
+          }
         }
-
-        function updateTrafficLight(rpm, requests) {
-            const card = document.getElementById('traffic-light-card');
-            const glow = document.getElementById('traffic-light-glow');
-            const title = document.getElementById('traffic-light-title');
-            const desc = document.getElementById('traffic-light-desc');
-            const dot = document.getElementById('traffic-light-dot');
-            const ping = document.getElementById('traffic-light-ping');
-            const ind = document.getElementById('traffic-light-indicator');
-
-            const rpmVal = document.getElementById('traffic-light-rpm-val');
-            const reqVal = document.getElementById('traffic-light-req-val');
-
-            // Seguridad Null pointer
-            if (rpmVal) rpmVal.innerText = rpm.toFixed(5);
-            if (reqVal) reqVal.innerText = requests >= 1000000 ? (requests / 1000000).toFixed(1) + 'M' : requests.toLocaleString();
-
-            // REGLA 1: Crítico
-            if (rpm < 0.0001 && requests > 10000000) {
-                if (title) title.innerText = "Crítico 🔴";
-                if (title) title.className = "text-xl font-bold text-rose-500 mt-0.5 tracking-tight";
-                if (desc) desc.innerText = "¡Tráfico masivo submonetizado! RPM < 0.0001 e ingresos muy bajos para >10M de solicitudes.";
-                if (card) card.className = "bg-slate-900 border-2 border-rose-500/50 rounded-2xl p-6 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl transition-all";
-                if (glow) glow.className = "absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-35 transition-all duration-500 bg-rose-500";
-                if (ind) ind.className = "relative flex h-14 w-14 items-center justify-center rounded-full bg-rose-950/40 border border-rose-500/50 transition-all duration-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]";
-                if (ping) ping.className = "absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping bg-rose-500";
-                if (dot) dot.className = "relative inline-flex rounded-full h-7 w-7 bg-rose-500";
-                return;
-            }
-
-            // REGLA 2: En riesgo
-            if (rpm < 0.0005 && requests > 5000000) {
-                if (title) title.innerText = "En riesgo 🟡";
-                if (title) title.className = "text-xl font-bold text-amber-500 mt-0.5 tracking-tight";
-                if (desc) desc.innerText = "Rendimiento deficiente. RPM < 0.0005 con volumen > 5M de solicitudes de anuncios.";
-                if (card) card.className = "bg-slate-900 border border-amber-500/40 rounded-2xl p-6 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl transition-all";
-                if (glow) glow.className = "absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 transition-all duration-500 bg-amber-500";
-                if (ind) ind.className = "relative flex h-14 w-14 items-center justify-center rounded-full bg-amber-950/40 border border-amber-500/30 transition-all duration-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]";
-                if (ping) ping.className = "absolute inline-flex h-full w-full rounded-full opacity-40 animate-ping bg-amber-500";
-                if (dot) dot.className = "relative inline-flex rounded-full h-7 w-7 bg-amber-500";
-                return;
-            }
-
-            // REGLA 3: Riesgo bajo
-            if (title) title.innerText = "Riesgo bajo ⚪";
-            if (title) title.className = "text-xl font-bold text-white mt-0.5 tracking-tight";
-            if (desc) desc.innerText = "El tráfico y los ingresos no cumplen las condiciones de riesgo crítico o moderado. La monetización está estable.";
-            if (card) card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl transition-all";
-            if (glow) glow.className = "absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-10 transition-all duration-500 bg-slate-500";
-            if (ind) ind.className = "relative flex h-14 w-14 items-center justify-center rounded-full bg-slate-800 border border-slate-700 transition-all duration-500";
-            if (ping) ping.className = "absolute inline-flex h-full w-full rounded-full opacity-0";
-            if (dot) dot.className = "relative inline-flex rounded-full h-7 w-7 bg-slate-400";
-        }
-
-        function saveScenario() {
-            const nameInput = document.getElementById('scenario-name');
-            const name = nameInput.value.trim() || `Escenario ${calcScenarios.length + 1}`;
-            
-            const requests = getRawValue(elCalcRequests);
-            const revenue = getRawValue(elCalcRevenue);
-            const impressions = isAdvancedMode ? getRawValue(elCalcImpressions) : null;
-
-            const requestRPM = requests > 0 ? (revenue / requests) * 1000 : 0;
-            const fillRate = (isAdvancedMode && requests > 0 && impressions > 0) ? (impressions / requests) * 100 : 0;
-            const impressionRPM = (isAdvancedMode && impressions > 0) ? (revenue / impressions) * 1000 : 0;
-
-            const sc = { id: Date.now(), name, requests, revenue, impressions, requestRPM, fillRate, impressionRPM };
-            calcScenarios.push(sc);
-            nameInput.value = '';
-
-            document.getElementById('scenarios-container').classList.remove('hidden');
-            updateScenariosUI();
-            showToast(`Escenario "${name}" guardado.`, "brand");
-        }
-
-        function updateScenariosUI() {
-            const listEl = document.getElementById('scenarios-list');
-            listEl.innerHTML = '';
-
-            calcScenarios.forEach((sc) => {
-                const item = document.createElement('div');
-                item.className = 'p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl flex justify-between items-center text-xs group';
-                item.innerHTML = `
-                    <div>
-                        <p class="font-bold text-white">${sc.name}</p>
-                        <p class="text-slate-500">Req: ${sc.requests.toLocaleString()} | Rev: ${formatCurrency(sc.revenue)}</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
-                            <p class="font-semibold text-brand-500">${formatCurrency(sc.requestRPM)} RPM</p>
-                        </div>
-                        <button onclick="deleteScenario(${sc.id})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                    </div>
-                `;
-                listEl.appendChild(item);
-            });
-
-            if (calcScenarios.length === 0) {
-                document.getElementById('scenarios-container').classList.add('hidden');
-            } else {
-                updateScenarioChart();
-            }
-        }
-
-        function deleteScenario(id) {
-            calcScenarios = calcScenarios.filter(sc => sc.id !== id);
-            updateScenariosUI();
-        }
-
-        function clearScenarios() {
-            calcScenarios = [];
-            updateScenariosUI();
-        }
-
-        function updateScenarioChart() {
-            const ctx = document.getElementById('scenario-chart').getContext('2d');
-            const labels = calcScenarios.map(sc => sc.name);
-            const dataRequestRPM = calcScenarios.map(sc => sc.requestRPM);
-
-            if (scenarioChart) scenarioChart.destroy();
-
-            scenarioChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'RPM Solicitud',
-                        data: dataRequestRPM,
-                        backgroundColor: 'rgba(34, 197, 94, 0.2)',
-                        borderColor: '#22c55e',
-                        borderWidth: 2,
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-                    }
-                }
-            });
-        }
-
-        function resetInputsCalc() {
-            elCalcRequests.value = "12,000,000";
-            elCalcRevenue.value = "0.90";
-            elCalcImpressions.value = "9,500,000";
-            calculateRPMCalc();
-            showToast("Inputs de simulación reiniciados.", "brand");
-        }
-
-
-        // ================= LÓGICA VISTA 2: ANALIZADOR CSV =================
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('border-brand-500', 'bg-slate-950');
-        });
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('border-brand-500', 'bg-slate-950');
-        });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-brand-500', 'bg-slate-950');
-            const file = e.dataTransfer.files[0];
-            if (file) handleFile(file);
-        });
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) handleFile(file);
-        });
-
-        // Hacer toda la zona de arrastre clickeable de forma correcta
-        dropZone.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        // === FUNCIÓN PRINCIPAL DE CARGA DE ARCHIVO ===
-        function handleFile(file) {
-            if (!file) return;
-            
-            document.getElementById('upload-status-text').innerHTML = `Analizando <strong class="text-white">${file.name}</strong>...`;
-
-            Papa.parse(file, {
-                header: false, // NO USAMOS header:true porque la primera línea de tus reportes es basura
-                skipEmptyLines: true,
-                complete: function(results) {
-                    processCSVResults(results, file.name, file.size);
-                },
-                error: function(err) {
-                    showToast("Error al procesar el archivo CSV: " + err.message, "rose");
-                    document.getElementById('upload-status-text').innerText = "Presiona para buscar o arrastra el archivo aquí";
-                }
-            });
-        }
-
-        function processCSVResults(results, filename, filesize) {
-            const data = results.data;
-            const errLog = document.getElementById('mapping-error-log');
-            const errText = document.getElementById('mapping-error-text');
-            errLog.classList.add('hidden');
-
-            // 1. Escaneo profundo para buscar la fila de las verdaderas cabeceras (saltando basura como "Global Report...")
-            let headerRowIndex = -1;
-            for (let i = 0; i < Math.min(20, data.length); i++) {
-                const rowStr = data[i].join(',').toLowerCase();
-                // Si la fila contiene Site, Domain o App Bundle y Requests, es la ganadora
-                if ((rowStr.includes('site') || rowStr.includes('domain') || rowStr.includes('app bundle')) && 
-                    (rowStr.includes('requests'))) {
-                    headerRowIndex = i;
-                    break;
-                }
-            }
-
-            if (headerRowIndex === -1) {
-                errText.innerText = "El documento no parece tener un formato válido. No se encontraron las columnas necesarias ('Site' o 'App Bundle', 'Requests').";
-                errLog.classList.remove('hidden');
-                showToast("Falla de lectura del reporte.", "rose");
-                document.getElementById('upload-status-text').innerText = "Presiona para buscar o arrastra el archivo aquí";
-                return;
-            }
-
-            const rawHeaders = data[headerRowIndex];
-            const headers = rawHeaders.map(cleanHeader);
-
-            // Búsqueda inteligente de columna identificadora (Site o App Bundle)
-            const siteCol = headers.findIndex(h => h === 'site' || h === 'sitio' || h === 'domain' || h === 'app bundle' || h === 'website');
-            const requestsCol = headers.findIndex(h => h === 'gross requests' || h === 'requests' || h === 'solicitudes');
-            
-            // Priorización de ingresos
-            let priceCol = headers.findIndex(h => h === 'revenue' || h === 'net net price' || h === 'net price');
-            if (priceCol === -1) {
-                priceCol = headers.findIndex(h => h === 'gross price' || h === 'price');
-            }
-
-            if (siteCol === -1 || requestsCol === -1 || priceCol === -1) {
-                const missing = [];
-                if (siteCol === -1) missing.push("'Site' / 'App Bundle'");
-                if (requestsCol === -1) missing.push("'Gross Requests'");
-                if (priceCol === -1) missing.push("'Revenue' o 'Net net price'");
-
-                const detectedList = rawHeaders.join(', ');
-                errText.innerText = `Falta la columna: ${missing.join(', ')}.\n\nCabeceras detectadas:\n[${detectedList}]`;
-                errLog.classList.remove('hidden');
-                showToast("Falla de mapeo de columnas.", "rose");
-                document.getElementById('upload-status-text').innerText = "Presiona para buscar o arrastra el archivo aquí";
-                return;
-            }
-
-            // Guardar globalmente la columna mapeada para la UI (limpia de comillas)
-            detectedRevenueColumn = rawHeaders[priceCol].replace(/["']/g, '');
-
-            document.getElementById('revenue-column-header').innerText = detectedRevenueColumn;
-            document.getElementById('revenue-card-title').innerText = `Ingresos Totales (${detectedRevenueColumn})`;
-
-            parsedSitesData = [];
-            
-            // 2. Extraer datos ignorando cabeceras
-            for (let i = headerRowIndex + 1; i < data.length; i++) {
-                const row = data[i];
-                if (row.length <= Math.max(siteCol, requestsCol, priceCol)) continue; // Saltar filas rotas
-
-                const siteName = row[siteCol] ? row[siteCol].toString().replace(/["']/g, '').trim() : `Elemento #${i}`;
-                const grossRequests = parseCleanNumber(row[requestsCol]);
-                const grossPrice = parseCleanNumber(row[priceCol]);
-
-                if (grossRequests > 0) {
-                    const rpm = (grossPrice / grossRequests) * 1000;
-                    let status = 'bajo';
-
-                    if (rpm < 0.0001 && grossRequests > 10000000) {
-                        status = 'critico';
-                    } else if (rpm < 0.0005 && grossRequests > 5000000) {
-                        status = 'riesgo';
-                    }
-
-                    parsedSitesData.push({ site: siteName, requests: grossRequests, revenue: grossPrice, rpm: rpm, status: status });
-                }
-            }
-
-            if (parsedSitesData.length === 0) {
-                showToast("No hay registros numéricos válidos en el reporte.", "rose");
-                document.getElementById('upload-status-text').innerText = "Presiona para buscar o arrastra el archivo aquí";
-                return;
-            }
-
-            // Extraer y procesar KPIs
-            document.getElementById('info-file-name').innerText = filename;
-            document.getElementById('info-file-size').innerText = (filesize / 1024).toFixed(2) + " KB";
-            // Contamos sólo las filas útiles que hemos sacado del bucle
-            document.getElementById('info-file-rows').innerText = parsedSitesData.length.toLocaleString();
-
-            document.getElementById('dashboard-section').classList.remove('hidden');
-            document.getElementById('upload-status-text').innerHTML = `Reporte cargado: <strong class="text-white">${filename}</strong>`;
-            
-            currentPage = 1;
-            currentSortColumn = 'status';
-            currentSortDirection = 'asc'; 
-            currentFilterStatus = 'all';
-
-            calculateAggregatesAndRender();
-            showToast("Reporte analizado con éxito.", "brand");
-        }
-
-        function calculateAggregatesAndRender() {
-            let totalRequests = 0;
-            let totalRevenue = 0;
-            let countCritico = 0, countRiesgo = 0, countBajo = 0;
-
-            parsedSitesData.forEach(site => {
-                totalRequests += site.requests;
-                totalRevenue += site.revenue;
-                if (site.status === 'critico') countCritico++;
-                else if (site.status === 'riesgo') countRiesgo++;
-                else countBajo++;
-            });
-
-            const globalRPM = totalRequests > 0 ? (totalRevenue / totalRequests) * 1000 : 0;
-
-            document.getElementById('stat-total-sites').innerText = parsedSitesData.length.toLocaleString();
-            document.getElementById('stat-active-domain-text').innerText = parsedSitesData.length + " sitios";
-            document.getElementById('stat-total-requests').innerText = totalRequests.toLocaleString('en-US');
-            document.getElementById('stat-total-revenue').innerText = formatCurrency(totalRevenue);
-            document.getElementById('stat-global-rpm').innerText = formatCurrency(globalRPM);
-
-            document.getElementById('badge-count-critico').innerText = countCritico;
-            document.getElementById('badge-count-riesgo').innerText = countRiesgo;
-            document.getElementById('badge-count-bajo').innerText = countBajo;
-
-            applyFiltersAndRender();
-        }
-
-        function applyFiltersAndRender() {
-            const query = searchInput.value.trim().toLowerCase();
-
-            filteredSitesData = parsedSitesData.filter(site => {
-                const matchQuery = site.site.toLowerCase().includes(query);
-                let matchStatus = true;
-                if (currentFilterStatus === 'critico') matchStatus = (site.status === 'critico');
-                else if (currentFilterStatus === 'riesgo') matchStatus = (site.status === 'riesgo');
-                else if (currentFilterStatus === 'bajo') matchStatus = (site.status === 'bajo');
-
-                return matchQuery && matchStatus;
-            });
-
-            sortData();
-            renderTable();
-            renderAnalyzerChart();
-        }
-
-        function setAuditFilter(status) {
-            currentFilterStatus = status;
-            currentPage = 1;
-
-            const btnCritico = document.getElementById('btn-filter-critico');
-            const btnRiesgo = document.getElementById('btn-filter-riesgo');
-            const btnBajo = document.getElementById('btn-filter-bajo');
-            const btnReset = document.getElementById('btn-reset-filter');
-
-            btnCritico.className = "bg-slate-950/40 hover:bg-slate-950 border border-slate-800 p-4 rounded-xl flex items-center justify-between transition-all text-left";
-            btnRiesgo.className = "bg-slate-950/40 hover:bg-slate-950 border border-slate-800 p-4 rounded-xl flex items-center justify-between transition-all text-left";
-            btnBajo.className = "bg-slate-950/40 hover:bg-slate-950 border border-slate-800 p-4 rounded-xl flex items-center justify-between transition-all text-left";
-
-            if (status === 'critico') {
-                btnCritico.classList.add('border-rose-500');
-                btnReset.classList.remove('hidden');
-            } else if (status === 'riesgo') {
-                btnRiesgo.classList.add('border-amber-500');
-                btnReset.classList.remove('hidden');
-            } else if (status === 'bajo') {
-                btnBajo.classList.add('border-brand-500');
-                btnReset.classList.remove('hidden');
-            } else {
-                btnReset.classList.add('hidden');
-            }
-
-            applyFiltersAndRender();
-        }
-
-        function sortData() {
-            filteredSitesData.sort((a, b) => {
-                let valA = a[currentSortColumn];
-                let valB = b[currentSortColumn];
-
-                // Ordenación semántica del semáforo
-                if (currentSortColumn === 'status') {
-                    const weightA = statusWeights[a.status] || 3;
-                    const weightB = statusWeights[b.status] || 3;
-                    return currentSortDirection === 'asc' 
-                        ? weightA - weightB  // asc: Crítico (1) -> Riesgo (2) -> Bajo (3)
-                        : weightB - weightA; // desc: Bajo (3) -> Riesgo (2) -> Crítico (1)
-                }
-
-                if (typeof valA === 'string') {
-                    return currentSortDirection === 'asc' 
-                        ? valA.localeCompare(valB) 
-                        : valB.localeCompare(valA);
-                } else {
-                    return currentSortDirection === 'asc' 
-                        ? valA - valB 
-                        : valB - valA;
-                }
-            });
-        }
-
-        function sortTable(column) {
-            if (currentSortColumn === column) {
-                currentSortDirection = currentSortDirection === 'desc' ? 'asc' : 'desc';
-            } else {
-                currentSortColumn = column;
-                currentSortDirection = column === 'status' ? 'asc' : 'desc';
-            }
-            currentPage = 1;
-            applyFiltersAndRender();
-        }
-
-        function renderTable() {
-            const tableBody = document.getElementById('sites-table-body');
-            tableBody.innerHTML = '';
-
-            const startIndex = (currentPage - 1) * rowsPerPage;
-            const endIndex = startIndex + rowsPerPage;
-            const pageData = filteredSitesData.slice(startIndex, endIndex);
-
-            pageData.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-900/40 transition-all";
-
-                let badge = '';
-                if (item.status === 'critico') {
-                    badge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-950/80 text-rose-400 border border-rose-500/30">🔴 Crítico</span>`;
-                } else if (item.status === 'riesgo') {
-                    badge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/80 text-amber-400 border border-amber-500/30">🟡 Riesgo</span>`;
-                } else {
-                    badge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-950 text-slate-300 border border-slate-800">⚪ Bajo</span>`;
-                }
-
-                tr.innerHTML = `
-                    <td class="px-4 py-3.5 whitespace-nowrap">${badge}</td>
-                    <td class="px-4 py-3.5 font-semibold text-slate-100 max-w-[200px] truncate" title="${item.site}">${item.site}</td>
-                    <td class="px-4 py-3.5 text-right font-mono text-slate-300">${item.requests.toLocaleString('en-US')}</td>
-                    <td class="px-4 py-3.5 text-right font-mono text-brand-500">${formatCurrency(item.revenue)}</td>
-                    <td class="px-4 py-3.5 text-right font-mono text-indigo-400 font-bold">${formatCurrency(item.rpm)}</td>
-                `;
-                tableBody.appendChild(tr);
-            });
-
-            const totalFiltered = filteredSitesData.length;
-            const endRow = Math.min(startIndex + rowsPerPage, totalFiltered);
-            document.getElementById('table-pagination-info').innerText = totalFiltered > 0 
-                ? `Mostrando ${startIndex + 1} - ${endRow} de ${totalFiltered} sitios`
-                : 'Sin resultados';
-
-            document.getElementById('btn-table-prev').disabled = (currentPage === 1);
-            document.getElementById('btn-table-next').disabled = (endRow >= totalFiltered);
-        }
-
-        function changePage(direction) {
-            currentPage += direction;
-            renderTable();
-        }
-
-        function renderAnalyzerChart() {
-            const ctx = document.getElementById('chart-rpm-ranking').getContext('2d');
-            const chartData = [...parsedSitesData].sort((a, b) => b.requests - a.requests).slice(0, 10);
-
-            const labels = chartData.map(item => item.site.split(' - ')[0].substring(0, 15));
-            const rpms = chartData.map(item => item.rpm);
-            const colors = chartData.map(item => item.status === 'critico' ? '#f43f5e' : (item.status === 'riesgo' ? '#f59e0b' : '#10b981'));
-
-            if (analyzerChartInstance) analyzerChartInstance.destroy();
-
-            analyzerChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: rpms,
-                        backgroundColor: colors,
-                        borderWidth: 0,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { size: 9 } } },
-                        y: { grid: { display: false }, ticks: { color: '#e2e8f0', font: { size: 9 } } }
-                    }
-                }
-            });
-        }
-
-        function loadSampleData() {
-            // Reporte simulado con la estructura idéntica a tus reportes oficiales
-            const mockCSVText = `"Site","Gross Requests","RAP","RAO","Available Rate","Requests","Impressions","Clicks","Fill Rate","CTR","Gross Price","Gross eCPM","Net Price","Net eCPM","Net net price","Net Net eCPM","Discrepancy"
-"lancs.live - Reach Shared Services Limited","36177276","12450468","663812","36.25","3109388","305098","2","9.81","0.00","48.84","0.16","43.94","0.14","43.94","0.14","0.99"
-"belfastlive.co.uk - Reach Shared Services Limited","35742576","11672172","667320","34.52","3182371","222787","0","7.00","0","36.78","0.17","33.98","0.15","33.97","0.15","0.99"
-"birminghammail.co.uk - Reach Shared Services Limited","88131188","30565824","6295856","41.83","17115696","1677338","41","9.80","0.00","525.93","0.31","475.53","0.28","473.22","0.28","0.99"
-"oxfordshirelive.co.uk - Reach Shared Services Limited","12000000","20040","640","8.84","844","42","0","4.98","0","10.00","0","0.02","0.45","0.90","0.42","0.99"
-"curiously.co.uk - Reach Shared Services Limited","3228","576","0","17.84","2","0","0","0","0","17.84","0","0","0","17.84","0","0"
-"insider.co.uk - Reach Shared Services Limited","4114552","69620","1761928","44.51","3467","763","0","22.01","0","34.67","0.11","0.14","0.09","34.67","0.12","0.99"
-"sportbible.com - Reach Shared Services Limited","6200000","5204","1792","54.74","2814","358","0","12.72","0","1.15","0","0","0","1.15","0","0"
-"chroniclelive.co.uk - Reach Shared Services Limited","250000","12450","1232","45.12","12041","1102","0","9.41","0","112.50","0.45","100.12","0.40","100.12","0.40","0.99"`;
-
-            Papa.parse(mockCSVText, {
-                header: false,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    processCSVResults(results, "Reporte_Simulado_Consola.csv", mockCSVText.length);
-                }
-            });
-        }
-
-        function exportToCSV() {
-            if (parsedSitesData.length === 0) return;
-            const csvRows = [['Site', 'Gross Requests', detectedRevenueColumn, 'Calculated RPM', 'Audit Status']];
-            parsedSitesData.forEach(item => {
-                csvRows.push([`"${item.site.replace(/"/g, '""')}"`, item.requests, item.revenue, item.rpm.toFixed(6), item.status.toUpperCase()]);
-            });
-
-            const csvContent = "data:text/csv;charset=utf-8," + csvRows.map(e => e.join(",")).join("\n");
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "auditoria_rpm_sitios.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast("Descarga de auditoría iniciada.", "brand");
-        }
-
-
-        // ================= NOTIFICACIONES TOAST =================
-        function showToast(message, type = "brand") {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toast-message');
-            const iconEl = document.getElementById('toast-icon');
-
-            if (!toast || !msgEl || !iconEl) return;
-
-            msgEl.innerText = message;
-            
-            if (type === "rose") {
-                toast.className = "fixed top-4 right-4 z-50 transform translate-y-0 opacity-100 transition-all duration-300 ease-out bg-slate-800 text-rose-200 border border-rose-500/30 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3";
-                iconEl.innerHTML = `<svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
-            } else {
-                toast.className = "fixed top-4 right-4 z-50 transform translate-y-0 opacity-100 transition-all duration-300 ease-out bg-slate-800 text-brand-100 border border-brand-500/30 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3";
-                iconEl.innerHTML = `<svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
-            }
-
-            toast.classList.replace('translate-y-[-150%]', 'translate-y-0');
-            toast.classList.replace('opacity-0', 'opacity-100');
-            
-            setTimeout(() => {
-                toast.classList.replace('translate-y-0', 'translate-y-[-150%]');
-                toast.classList.replace('opacity-100', 'opacity-0');
-            }, 3000);
-        }
-
-        function copyToClipboard(elementId, typeName) {
-            const textToCopy = document.getElementById(elementId).innerText;
-            const tempInput = document.createElement('input');
-            tempInput.value = textToCopy;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) showToast(`¡Copiado! ${typeName}: ${textToCopy}`);
-            } catch (err) {
-                showToast("Error al copiar.");
-            }
-            document.body.removeChild(tempInput);
-        }
-
-        // ================= INICIALIZACIÓN DE LA APLICACIÓN =================
-        window.onload = function () {
-            // Realizar cálculo inicial tras comprobar que los elementos se han montado correctamente
-            calculateRPMCalc();
-            switchTab('calculadora'); // Por defecto abre en la Calculadora Simple
-        }
-    </script>
+      });
+    }
+
+    document.getElementById('btn-export-csv').addEventListener('click', () => {
+      if(parsedSitesData.length === 0) return;
+      let csv = "Site,Gross Requests," + detectedRevenueColumn + ",Calculated RPM,Status\n";
+      parsedSitesData.forEach(s => {
+        csv += `"${s.site}",${s.requests},${s.revenue},${s.rpm.toFixed(4)},${s.status}\n`;
+      });
+      const link = document.createElement('a');
+      link.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+      link.download = 'rpm_audit_report.csv';
+      link.click();
+    });
+
+    // Load Demo Data
+    document.getElementById('btn-load-demo').addEventListener('click', () => {
+      const demoCsv = `"Site","Gross Requests","Gross Price","Net net price"\n"critical-site.com","12000000","100.00","0.90"\n"at-risk-site.net","6200000","120.00","2.00"\n"healthy-site.es","88131188","1500.00","475.00"\n"small-blog.com","250000","20.00","10.00"\n"active-forum.net","4500000","400.00","250.00"`;
+      Papa.parse(demoCsv, { header: false, skipEmptyLines: true, complete: function(res) { processCSV(res.data, "demo_report.csv"); }});
+    });
+
+    // Initialize default calc
+    calculateRPMCalc();
+  </script>
 </body>
 </html>
